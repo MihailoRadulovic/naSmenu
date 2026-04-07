@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                Int        @id @default(autoincrement())
+  email             String     @unique
+  cafeName          String
+  passwordHash      String
+  emailVerified     Boolean    @default(false)
+  verificationToken String?    @unique
+  resetToken        String?    @unique
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime   @default(now())
+  employees         Employee[]
+  weeks             Week[]
+  settings          Settings?
+}
+
+model Employee {
+  id         Int             @id @default(autoincrement())
+  name       String
+  isActive   Boolean         @default(true)
+  hourlyRate Float?
+  notes      String?
+  createdAt  DateTime        @default(now())
+  userId     Int             @default(1)
+  user       User            @relation(fields: [userId], references: [id])
+  shifts     ScheduleEntry[]
+
+  @@index([isActive])
+  @@index([userId])
+}
+
+model Week {
+  id        Int             @id @default(autoincrement())
+  startDate DateTime
+  endDate   DateTime
+  userId    Int             @default(1)
+  createdAt DateTime        @default(now())
+  entries   ScheduleEntry[]
+  user      User            @relation(fields: [userId], references: [id])
+
+  @@unique([startDate, userId])
+  @@index([userId])
+}
+
+model Settings {
+  id          Int    @id @default(autoincrement())
+  userId      Int    @unique @default(1)
+  firstStart  String @default("07:15")
+  firstEnd    String @default("15:23")
+  secondStart String @default("15:23")
+  secondEnd   String @default("23:00")
+  user        User   @relation(fields: [userId], references: [id])
+}
+
+model ScheduleEntry {
+  id          Int      @id @default(autoincrement())
+  weekId      Int
+  day         Int
+  shiftType   String
+  halfShift   Boolean  @default(false)
+  employeeId  Int
+  updatedAt   DateTime @default(now()) @updatedAt
+  middleEnd   Int?
+  middleStart Int?
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  week        Week     @relation(fields: [weekId], references: [id])
+
+  @@unique([weekId, day, employeeId, shiftType])
+  @@index([employeeId])
+  @@index([weekId])
+  @@index([shiftType])
+}

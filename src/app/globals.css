@@ -1,0 +1,277 @@
+@import "tailwindcss";
+
+@theme {
+  /* Dark mode colors (default) */
+  --color-bg-primary: #0A0A0A;
+  --color-bg-secondary: #141414;
+  --color-bg-tertiary: #1E1E1E;
+  --color-accent-green: #2DD4A0;
+  --color-accent-green-dark: #1A9E78;
+  --color-accent-yellow: #F5C842;
+  --color-accent-red: #EF4444;
+  --color-accent-blue: #6B8FD4;
+  --color-accent-blue-dark: #4A6BB5;
+  --color-accent-purple: #9B6DFF;
+  --color-accent-orange: #FF7B47;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #9CA3AF;
+  --color-text-muted: #8A929E;
+  --color-border: #2D2D2D;
+
+  /* Fonts */
+  --font-sans: var(--font-body), system-ui, sans-serif;
+  --font-heading: var(--font-heading), system-ui, sans-serif;
+
+  /* Border Radius */
+  --radius-card: 16px;
+  --radius-card-lg: 20px;
+  --radius-pill: 9999px;
+}
+
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 250ms ease, color 250ms ease;
+}
+
+/* ===== Light mode ===== */
+html.light {
+  color-scheme: light;
+  --color-bg-primary: #F0F2F5;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-tertiary: #E8EBF0;
+  --color-accent-green: #0D9E72;
+  --color-accent-green-dark: #0A7D5A;
+  --color-accent-yellow: #D4960A;
+  --color-accent-red: #DC2626;
+  --color-accent-blue: #2563EB;
+  --color-accent-blue-dark: #1D4ED8;
+  --color-accent-purple: #7C3AED;
+  --color-accent-orange: #EA580C;
+  --color-text-primary: #111827;
+  --color-text-secondary: #374151;
+  --color-text-muted: #8A929E;
+  --color-border: #D1D5DB;
+}
+
+html.light body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+html.light select option {
+  background-color: #FFFFFF;
+  color: #111827;
+}
+
+html.light input,
+html.light textarea {
+  color-scheme: light;
+}
+
+/* Hide scrollbar but keep scrollable */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Mobile-first app container */
+.app-container {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  position: relative;
+  padding-bottom: 90px;
+}
+
+/* Remove tap highlight */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+button, a, [role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+button, a, [role="button"] {
+  transition-property: transform, opacity, background-color, color, border-color;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+
+button:active, a:active, [role="button"]:active {
+  transform: scale(0.97);
+}
+
+@media (display-mode: standalone) {
+  body { overscroll-behavior: none; }
+}
+
+.rounded-pill {
+  border-radius: 9999px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: 2px;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Tabular numbers for salary/stats */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== Print-only element (hidden on screen) ===== */
+.print-only {
+  display: none;
+}
+
+/* ===== Print styles ===== */
+@page {
+  size: A4 landscape;
+  margin: 8mm 10mm;
+}
+
+@media print {
+  /* Hide everything that is a direct child of body except our portal div */
+  body > *:not(.print-only) {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+    background: white;
+    color: black;
+    font-family: 'Arial Black', 'Arial', sans-serif;
+    font-size: 11px;
+    width: 100%;
+  }
+
+  .print-only * {
+    visibility: visible;
+  }
+
+  .print-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #111;
+  }
+
+  /* Table */
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .print-th {
+    background: #e8e8e8;
+    color: #000;
+    padding: 7px 6px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    border: 1px solid #bbb;
+  }
+
+  .print-th-name {
+    width: 14%;
+    text-align: left;
+    padding-left: 8px;
+    font-size: 13px;
+    font-family: 'Arial Black', 'Arial', sans-serif;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+  }
+
+  .print-th-day {
+    width: 12.28%;
+  }
+
+  .print-day-short {
+    display: block;
+    font-size: 13px;
+    font-weight: 900;
+    font-family: 'Arial Black', 'Arial', sans-serif;
+    letter-spacing: 0.08em;
+    color: #000;
+  }
+
+  .print-day-date {
+    display: block;
+    font-size: 9px;
+    font-weight: 500;
+    color: #444;
+    margin-top: 2px;
+  }
+
+  .print-td {
+    padding: 7px 6px;
+    border: 1px solid #ddd;
+    text-align: center;
+    font-size: 10px;
+    vertical-align: middle;
+  }
+
+  .print-td-name {
+    text-align: left;
+    padding-left: 10px;
+    font-weight: 600;
+    font-size: 11px;
+    background: #f7f7f7;
+    border-right: 2px solid #bbb;
+  }
+
+  .print-row-even .print-td { background: #ffffff; }
+  .print-row-odd  .print-td { background: #f9f9f9; }
+  .print-row-even .print-td-name,
+  .print-row-odd  .print-td-name { background: #f0f0f0; }
+
+  /* Shift cell styles */
+  .cell-first   { font-weight: 700; color: #000; }
+  .cell-second  { font-weight: 400; color: #333; }
+  .cell-middle  { font-weight: 600; color: #555; font-size: 9px; }
+  .cell-off     { color: #bbb; font-size: 13px; line-height: 1; }
+  .cell-absence { font-style: italic; color: #888; }
+
+  /* Legend */
+  .print-legend {
+    margin-top: 10px;
+    display: flex;
+    gap: 16px;
+    font-size: 9px;
+    color: #555;
+    border-top: 1px solid #ddd;
+    padding-top: 6px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .legend-item::before {
+    content: '■';
+    font-size: 8px;
+  }
+
+  .cell-first.legend-item::before   { color: #000; }
+  .cell-second.legend-item::before  { color: #666; }
+  .cell-middle.legend-item::before  { color: #888; }
+  .cell-off.legend-item::before     { color: #ccc; }
+  .cell-absence.legend-item::before { color: #aaa; }
+}
