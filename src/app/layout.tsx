@@ -4,6 +4,7 @@ import { BottomNav } from '@/components/layout/BottomNav'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { NextAuthProvider } from '@/components/providers/NextAuthProvider'
+import { FeaturesProvider } from '@/components/providers/FeaturesProvider'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -36,6 +37,7 @@ export default function RootLayout({
       </head>
       <body>
         <NextAuthProvider>
+          <FeaturesProvider>
           <ToastProvider>
             <ThemeProvider>
               <div className="app-container">
@@ -44,6 +46,7 @@ export default function RootLayout({
               <BottomNav />
             </ThemeProvider>
           </ToastProvider>
+          </FeaturesProvider>
         </NextAuthProvider>
       </body>
     </html>

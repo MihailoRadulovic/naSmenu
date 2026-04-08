@@ -8,6 +8,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
 import { WeekAccordion } from './WeekAccordion'
 import { WeeklyTrendChart } from './WeeklyTrendChart'
+import { useFeatures } from '@/lib/features'
 
 const MONTH_NAMES_SR = [
   'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun',
@@ -21,6 +22,7 @@ interface WeeklyViewProps {
 }
 
 export function WeeklyView({ month, year, filteredEmployeeIds }: WeeklyViewProps) {
+  const features = useFeatures()
   const [data, setData] = useState<WeekStats[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -113,7 +115,9 @@ export function WeeklyView({ month, year, filteredEmployeeIds }: WeeklyViewProps
   return (
     <div className="flex flex-col gap-3">
       {/* Trend chart */}
-      <WeeklyTrendChart data={data} filteredEmployeeIds={filteredEmployeeIds} />
+      {features.charts && (
+        <WeeklyTrendChart data={data} filteredEmployeeIds={filteredEmployeeIds} />
+      )}
 
       {/* Scroll to top FAB */}
       <button

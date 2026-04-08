@@ -4,7 +4,7 @@ import { DAY_NAMES_SHORT } from '@/types'
 import type { WeekSchedule } from '@/types'
 import { toISODateString } from '@/lib/dates'
 import { getHoliday } from '@/lib/holidays'
-import { features } from '@/lib/features'
+import { useFeatures } from '@/lib/features'
 
 interface DayTabsProps {
   selectedDay: number
@@ -14,6 +14,7 @@ interface DayTabsProps {
 }
 
 export function DayTabs({ selectedDay, schedule, onSelectDay, weekStartDate }: DayTabsProps) {
+  const features = useFeatures()
   return (
     <div className="flex overflow-x-auto gap-1 rounded-card bg-bg-secondary border border-border p-1.5 no-scrollbar">
       {DAY_NAMES_SHORT.map((label, day) => {

@@ -29,21 +29,37 @@ export async function PUT(request: NextRequest) {
     const userId = session.user.id
 
     const body = await request.json()
-    const { firstStart, firstEnd, secondStart, secondEnd } = body
+    const updateData: Record<string, unknown> = {}
 
-    for (const [field, value] of Object.entries({ firstStart, firstEnd, secondStart, secondEnd })) {
-      if (typeof value !== 'string' || !TIME_REGEX.test(value)) {
-        return NextResponse.json(
-          { error: `Polje ${field} mora biti u formatu HH:MM.` },
-          { status: 400 }
-        )
+    // Shift times (optional — validate only if provided)
+    const timeFields = ['firstStart', 'firstEnd', 'secondStart', 'secondEnd'] as const
+    for (const field of timeFields) {
+      if (body[field] !== undefined) {
+        if (typeof body[field] !== 'string' || !TIME_REGEX.test(body[field])) {
+          return NextResponse.json(
+            { error: `Polje ${field} mora biti u formatu HH:MM.` },
+            { status: 400 }
+          )
+        }
+        updateData[field] = body[field]
+      }
+    }
+
+    // Feature flags (optional)
+    const featureFields = [
+      'featureSalary', 'featurePrint', 'featureHolidays',
+      'featureAbsence', 'featureNotes', 'featureCopyWeek', 'featureCharts',
+    ] as const
+    for (const field of featureFields) {
+      if (typeof body[field] === 'boolean') {
+        updateData[field] = body[field]
       }
     }
 
     const settings = await prisma.settings.upsert({
       where: { userId },
-      create: { userId, firstStart, firstEnd, secondStart, secondEnd },
-      update: { firstStart, firstEnd, secondStart, secondEnd },
+      create: { userId, ...updateData },
+      update: updateData,
     })
 
     return NextResponse.json({ data: settings })

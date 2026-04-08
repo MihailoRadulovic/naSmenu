@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Sun, Moon } from 'lucide-react'
-import { features } from '@/lib/features'
 
 export function ThemeToggleButton() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
@@ -11,8 +10,6 @@ export function ThemeToggleButton() {
     const stored = localStorage.getItem('theme') as 'dark' | 'light' | null
     if (stored) setTheme(stored)
   }, [])
-
-  if (!features.darkMode) return null
 
   function toggleTheme() {
     const next = theme === 'dark' ? 'light' : 'dark'

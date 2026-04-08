@@ -51,13 +51,20 @@ model Week {
 }
 
 model Settings {
-  id          Int    @id @default(autoincrement())
-  userId      Int    @unique @default(1)
-  firstStart  String @default("07:15")
-  firstEnd    String @default("15:23")
-  secondStart String @default("15:23")
-  secondEnd   String @default("23:00")
-  user        User   @relation(fields: [userId], references: [id])
+  id              Int     @id @default(autoincrement())
+  userId          Int     @unique @default(1)
+  firstStart      String  @default("07:15")
+  firstEnd        String  @default("15:23")
+  secondStart     String  @default("15:23")
+  secondEnd       String  @default("23:00")
+  featureSalary   Boolean @default(true)
+  featurePrint    Boolean @default(true)
+  featureHolidays Boolean @default(true)
+  featureAbsence  Boolean @default(true)
+  featureNotes    Boolean @default(true)
+  featureCopyWeek Boolean @default(true)
+  featureCharts   Boolean @default(true)
+  user            User    @relation(fields: [userId], references: [id])
 }
 
 model ScheduleEntry {

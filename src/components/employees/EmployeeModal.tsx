@@ -5,7 +5,7 @@ import type { Employee, EmployeeFormData } from '@/types'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { features } from '@/lib/features'
+import { useFeatures } from '@/lib/features'
 
 interface EmployeeModalProps {
   isOpen: boolean
@@ -15,6 +15,7 @@ interface EmployeeModalProps {
 }
 
 export function EmployeeModal({ isOpen, onClose, onSave, employee }: EmployeeModalProps) {
+  const features = useFeatures()
   const [name, setName] = useState('')
   const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState<{ name?: string }>({})

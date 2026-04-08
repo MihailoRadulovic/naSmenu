@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { ArrowDownUp, ArrowDown, ArrowUp } from 'lucide-react'
-import { features } from '@/lib/features'
+import { useFeatures } from '@/lib/features'
 import { ThemeToggleButton } from '@/components/layout/ThemeToggleButton'
 
 interface SalaryEntry {
@@ -17,6 +17,7 @@ interface SalaryEntry {
 const MONTH_NAMES = ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar']
 
 export default function SalaryPage() {
+  const features = useFeatures()
   const now = new Date()
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [year, setYear] = useState(now.getFullYear())

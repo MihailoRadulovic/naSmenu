@@ -6,7 +6,7 @@ import { DAY_NAMES } from '@/types'
 import { ShiftBadge } from './ShiftBadge'
 import { formatDateShort, toISODateString } from '@/lib/dates'
 import { getHoliday } from '@/lib/holidays'
-import { features } from '@/lib/features'
+import { useFeatures } from '@/lib/features'
 import { minutesToTime } from '@/lib/shiftHours'
 import { DEFAULT_SHIFT_SETTINGS } from '@/lib/shiftSettings'
 import type { ShiftSettings } from '@/lib/shiftSettings'
@@ -31,6 +31,7 @@ function isToday(date: Date): boolean {
 
 export function DayCard({ day, date, weekId, entries, shiftSettings }: DayCardProps) {
   const settings = shiftSettings ?? DEFAULT_SHIFT_SETTINGS
+  const features = useFeatures()
   const router = useRouter()
   const today = isToday(date)
   const dateStr = toISODateString(date)

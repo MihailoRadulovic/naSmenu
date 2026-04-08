@@ -8,6 +8,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
 import { EmployeeStatRow } from './EmployeeStatRow'
 import { MonthlyHoursChart } from './MonthlyHoursChart'
+import { useFeatures } from '@/lib/features'
 
 const MONTH_NAMES_SR = [
   'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun',
@@ -23,6 +24,7 @@ interface MonthlyViewProps {
 }
 
 export function MonthlyView({ month, year, filteredEmployeeIds }: MonthlyViewProps) {
+  const features = useFeatures()
   const [data, setData] = useState<EmployeeStats[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -113,7 +115,7 @@ export function MonthlyView({ month, year, filteredEmployeeIds }: MonthlyViewPro
       </div>
 
       {/* Bar chart */}
-      {filteredData.length >= 2 && (
+      {features.charts && filteredData.length >= 2 && (
         <MonthlyHoursChart data={filteredData} />
       )}
 

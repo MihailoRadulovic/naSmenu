@@ -1,6 +1,6 @@
 'use client'
 
-import { features } from '@/lib/features'
+import { useFeatures } from '@/lib/features'
 
 interface PrintButtonProps {
   label?: string
@@ -8,6 +8,7 @@ interface PrintButtonProps {
 }
 
 export function PrintButton({ label = 'Štampaj', className }: PrintButtonProps) {
+  const features = useFeatures()
   if (!features.printSchedule) return null
 
   return (

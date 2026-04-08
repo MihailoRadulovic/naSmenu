@@ -21,7 +21,7 @@ import { WeekPicker } from './WeekPicker'
 import { DayTabs } from './DayTabs'
 import { EmployeeChip } from './EmployeeChip'
 import { TimeSelect } from './TimeSelect'
-import { features } from '@/lib/features'
+import { useFeatures } from '@/lib/features'
 import { getHoliday } from '@/lib/holidays'
 
 const BASE_SHIFT_SECTIONS: { shiftType: ShiftType; emoji: string; label: string }[] = [
@@ -46,6 +46,7 @@ function getShiftTypes(schedule: WeekSchedule, day: number, empId: number): Shif
 }
 
 export function ScheduleEditor() {
+  const features = useFeatures()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { showToast } = useToast()

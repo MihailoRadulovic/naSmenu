@@ -5,7 +5,7 @@ const FROM = process.env.RESEND_FROM ?? 'SmenaApp <onboarding@resend.dev>'
 const BASE_URL = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
 
 export async function sendVerificationEmail(to: string, token: string) {
-  const url = `${BASE_URL}/verify-email?token=${token}`
+  const url = `${BASE_URL}/api/auth/verify-email?token=${token}`
 
   console.log(`\n[EMAIL] Aktivacioni link za ${to}:\n${url}\n`)
 

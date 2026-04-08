@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { ClipboardList, Plus, BarChart3, Users, DollarSign } from 'lucide-react'
-import { features } from '@/lib/features'
+import { useFeatures } from '@/lib/features'
 
 const BASE_NAV_ITEMS = [
   { href: '/', label: 'Raspored', icon: ClipboardList },
@@ -16,6 +16,7 @@ const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password
 
 export function BottomNav() {
   const pathname = usePathname()
+  const features = useFeatures()
 
   if (AUTH_ROUTES.some((route) => pathname.startsWith(route))) return null
 
