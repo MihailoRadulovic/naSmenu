@@ -42,6 +42,7 @@ export default function RegisterPage() {
         return
       }
 
+      sessionStorage.setItem('prefill_email', email)
       setDone(true)
     } catch {
       setError('Greška pri povezivanju sa serverom.')
