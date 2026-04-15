@@ -26,7 +26,7 @@ export async function sendVerificationEmail(to: string, token: string) {
   })
 
   if (result.error) {
-    console.warn('[email] Resend greška:', result.error)
+    throw new Error(`Resend greška (verifikacija): ${result.error.message}`)
   }
 }
 
@@ -52,6 +52,6 @@ export async function sendPasswordResetEmail(to: string, token: string) {
   })
 
   if (result.error) {
-    console.warn('[email] Resend greška, link za reset:', url)
+    throw new Error(`Resend greška (reset): ${result.error.message}`)
   }
 }

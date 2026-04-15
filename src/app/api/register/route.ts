@@ -43,7 +43,16 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    await sendVerificationEmail(user.email, verificationToken)
+    try {
+      await sendVerificationEmail(user.email, verificationToken)
+    } catch (emailError) {
+      console.error('[POST /api/register] Email nije poslat:', emailError)
+      await prisma.user.delete({ where: { id: user.id } })
+      return NextResponse.json(
+        { error: 'Nalog nije kreiran — greška pri slanju verifikacionog emaila. Pokušajte ponovo.' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(
       { data: { id: user.id, email: user.email, cafeName: user.cafeName } },

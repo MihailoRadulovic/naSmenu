@@ -29,7 +29,15 @@ export async function POST(request: NextRequest) {
       data: { resetToken, resetTokenExpiry },
     })
 
-    await sendPasswordResetEmail(user.email, resetToken)
+    try {
+      await sendPasswordResetEmail(user.email, resetToken)
+    } catch (emailError) {
+      console.error('[POST /api/auth/forgot-password] Email nije poslat:', emailError)
+      return NextResponse.json(
+        { error: 'Greška pri slanju emaila. Pokušajte ponovo.' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ data: { sent: true } })
   } catch (error) {
