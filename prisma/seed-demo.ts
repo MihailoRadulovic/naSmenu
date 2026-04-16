@@ -103,13 +103,13 @@ async function main() {
 
     // 3. Create employees
     const empData = [
-      { name: 'Nemanja Glišić',  hourlyRate: 1200, notes: 'Radi vikendom, vozač' },
-      { name: 'Danilo Petrović', hourlyRate: 1100, notes: null },
-      { name: 'Mihailo Jović',   hourlyRate: 1150, notes: 'Student, max 4 dana' },
-      { name: 'Anđela Simić',    hourlyRate: 1100, notes: null },
-      { name: 'Tamara Ilić',     hourlyRate: 1200, notes: null },
-      { name: 'Stefan Marković', hourlyRate: 1050, notes: null },
-      { name: 'Milica Nikolić',  hourlyRate: 1150, notes: 'Zamijena vikendom' },
+      { name: 'Nemanja Glišić',  hourlyRate: 365, notes: 'Radi vikendom, vozač' },
+      { name: 'Danilo Petrović', hourlyRate: 335, notes: null },
+      { name: 'Mihailo Jović',   hourlyRate: 325, notes: 'Student, max 4 dana' },
+      { name: 'Anđela Simić',    hourlyRate: 340, notes: null },
+      { name: 'Tamara Ilić',     hourlyRate: 360, notes: null },
+      { name: 'Stefan Marković', hourlyRate: 320, notes: null },
+      { name: 'Milica Nikolić',  hourlyRate: 350, notes: 'Zamijena vikendom' },
     ]
 
     const employees = await Promise.all(

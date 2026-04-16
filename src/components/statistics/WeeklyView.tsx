@@ -7,7 +7,6 @@ import type { WeekStats } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
 import { WeekAccordion } from './WeekAccordion'
-import { WeeklyTrendChart } from './WeeklyTrendChart'
 import { useFeatures } from '@/lib/features'
 
 const MONTH_NAMES_SR = [
@@ -114,11 +113,6 @@ export function WeeklyView({ month, year, filteredEmployeeIds }: WeeklyViewProps
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Trend chart */}
-      {features.charts && (
-        <WeeklyTrendChart data={data} filteredEmployeeIds={filteredEmployeeIds} />
-      )}
-
       {/* Scroll to top FAB */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}

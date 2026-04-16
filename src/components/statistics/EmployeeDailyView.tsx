@@ -187,8 +187,8 @@ export function EmployeeDailyView({ employeeId, initialMonth, initialYear }: Emp
               <SummaryCard
                 emoji="🕐"
                 label="Međusm."
-                value={String(data.summary.middleShifts)}
-                subValue="smena"
+                value={`${Math.round(data.summary.middleHours)}h`}
+                subValue={`${formatCount(data.summary.middleShifts)} smena`}
                 colorClass="bg-[#F59E0B]/15 text-[#B45309]"
                 isActive={activeFilters.has('middle')}
                 onClick={() => toggleFilter('middle')}
@@ -218,6 +218,12 @@ export function EmployeeDailyView({ employeeId, initialMonth, initialYear }: Emp
 
           {/* Daily list */}
           <div className="flex flex-col gap-1.5">
+            {filteredDays.length === 0 && (
+              <div className="flex flex-col items-center justify-center gap-2 py-10 text-text-muted">
+                <Calendar size={32} className="opacity-40" />
+                <p className="text-sm">Nema unosa za izabrani filter.</p>
+              </div>
+            )}
             {filteredDays.map((day) => {
               const dateObj = new Date(day.date)
               const dateStr = `${String(dateObj.getDate()).padStart(2, '0')}.${String(dateObj.getMonth() + 1).padStart(2, '0')}.`
