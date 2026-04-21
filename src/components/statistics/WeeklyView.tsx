@@ -48,7 +48,7 @@ export function WeeklyView({ month, year, filteredEmployeeIds }: WeeklyViewProps
         const weeks: WeekStats[] = json.data ?? []
         setData(weeks)
         // Otvori prvu nedelju po defaultu
-        setOpenWeekIds(weeks.length > 0 ? new Set([weeks[0].weekId]) : new Set())
+        setOpenWeekIds(new Set())
       })
       .catch(() => setError('Greška pri učitavanju sedmičnih statistika.'))
       .finally(() => setLoading(false))
