@@ -74,14 +74,21 @@ function LoginForm() {
         {/* Branding */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <Image
-            src="/logo.png"
+            src="/logo-icon.png"
             alt="naSmenu"
-            width={120}
-            height={120}
-            style={{ margin: '0 auto 8px', display: 'block' }}
+            width={90}
+            height={90}
+            style={{ margin: '-16px auto 8px', display: 'block' }}
             priority
             unoptimized
           />
+          <h1 style={{
+            color: 'var(--color-text-primary)', fontSize: '1.6rem',
+            fontWeight: 500, margin: 0,
+            fontFamily: 'var(--font-heading, system-ui)',
+          }}>
+            Dobrodošli
+          </h1>
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: '6px' }}>
             Prijavite se na vaš nalog
           </p>
