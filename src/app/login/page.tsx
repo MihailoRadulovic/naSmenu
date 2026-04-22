@@ -4,6 +4,7 @@ import { useState, FormEvent, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ThemeToggleButton } from '@/components/layout/ThemeToggleButton'
 import { Suspense } from 'react'
 
@@ -72,10 +73,14 @@ function LoginForm() {
       <div style={{ width: '100%', maxWidth: '380px' }}>
         {/* Branding */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <img
+          <Image
             src="/logo.png"
             alt="naSmenu"
-            style={{ width: '120px', height: 'auto', margin: '0 auto 8px', display: 'block' }}
+            width={120}
+            height={120}
+            style={{ margin: '0 auto 8px', display: 'block' }}
+            priority
+            unoptimized
           />
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: '6px' }}>
             Prijavite se na vaš nalog
@@ -90,7 +95,7 @@ function LoginForm() {
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="vasa@email.com"
+              placeholder="primer@gmail.com"
               required
               autoComplete="email"
               style={inputStyle}

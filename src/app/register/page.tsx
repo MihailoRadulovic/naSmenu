@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ThemeToggleButton } from '@/components/layout/ThemeToggleButton'
 
 export default function RegisterPage() {
@@ -66,14 +67,18 @@ export default function RegisterPage() {
       <div style={{ width: '100%', maxWidth: '380px', paddingBlock: '24px' }}>
         {/* Branding */}
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <img
-            src="/logo.png"
+          <Image
+            src="/logo-icon.png"
             alt="naSmenu"
-            style={{ width: '120px', height: 'auto', margin: '0 auto 8px', display: 'block' }}
+            width={90}
+            height={90}
+            style={{ margin: '-16px auto 8px', display: 'block' }}
+            priority
+            unoptimized
           />
           <h1 style={{
             color: 'var(--color-text-primary)', fontSize: '1.6rem',
-            fontWeight: 700, margin: 0,
+            fontWeight: 500, margin: 0,
             fontFamily: 'var(--font-heading, system-ui)',
           }}>
             Registracija
@@ -120,7 +125,7 @@ export default function RegisterPage() {
               <input
                 type="email" value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="vasa@email.com" required
+                placeholder="primer@gmail.com" required
                 autoComplete="email" style={inputStyle}
               />
             </div>
@@ -129,7 +134,7 @@ export default function RegisterPage() {
               <input
                 type="text" value={cafeName}
                 onChange={e => setCafeName(e.target.value)}
-                placeholder="Kafić Primer" required style={inputStyle}
+                placeholder="Naziv Lokala" required style={inputStyle}
               />
             </div>
             <div>
