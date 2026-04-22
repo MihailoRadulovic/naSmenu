@@ -8,12 +8,12 @@ import { FeaturesProvider } from '@/components/providers/FeaturesProvider'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'SmenaApp',
+  title: 'naSmenu',
   description: 'Raspored smena za kafiće',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'SmenaApp',
+    title: 'naSmenu',
   },
 }
 
