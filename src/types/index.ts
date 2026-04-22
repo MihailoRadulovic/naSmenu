@@ -4,6 +4,7 @@ import type { Employee, Week, ScheduleEntry } from '@/generated/prisma/client'
 export interface EmployeeFormData {
   name: string
   notes?: string
+  hourlyRate?: number
 }
 
 export const SHIFT_TYPES = {

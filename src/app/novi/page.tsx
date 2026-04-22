@@ -1,4 +1,7 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
+
+export const metadata: Metadata = { title: 'Novi raspored' }
 import { ScheduleEditor } from '@/components/schedule/ScheduleEditor'
 import { Spinner } from '@/components/ui/Spinner'
 

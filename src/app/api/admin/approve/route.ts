@@ -2,32 +2,41 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendUserApprovedEmail } from '@/lib/email'
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const userId = parseInt(searchParams.get('userId') ?? '')
-  const secret = searchParams.get('secret')
+  const token = searchParams.get('token')
 
-  if (!secret || !process.env.ADMIN_SECRET || secret !== process.env.ADMIN_SECRET) {
+  if (!token) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
-  if (isNaN(userId)) {
-    return new NextResponse('Invalid userId', { status: 400 })
-  }
-
-  const user = await prisma.user.findUnique({ where: { id: userId } })
+  const user = await prisma.user.findUnique({ where: { approvalToken: token } })
 
   if (!user) {
-    return new NextResponse('Korisnik nije pronađen.', { status: 404 })
+    return new NextResponse('Nevažeći ili iskorišćeni token.', { status: 400 })
   }
 
   if (user.isApproved) {
+    // Poništi token i pri već odobrenim
+    await prisma.user.update({ where: { id: user.id }, data: { approvalToken: null } })
     return new NextResponse(successHtml(user.cafeName, true), {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     })
   }
 
-  await prisma.user.update({ where: { id: userId }, data: { isApproved: true } })
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { isApproved: true, approvalToken: null },
+  })
 
   try {
     await sendUserApprovedEmail(user.email, user.cafeName)
@@ -41,9 +50,10 @@ export async function GET(request: NextRequest) {
 }
 
 function successHtml(cafeName: string, alreadyApproved: boolean) {
+  const safeName = escapeHtml(cafeName)
   const message = alreadyApproved
-    ? `Nalog za <strong>${cafeName}</strong> je već bio odobren.`
-    : `Nalog za <strong>${cafeName}</strong> je uspešno odobren. Korisnik je obavešten putem emaila.`
+    ? `Nalog za <strong>${safeName}</strong> je već bio odobren.`
+    : `Nalog za <strong>${safeName}</strong> je uspešno odobren. Korisnik je obavešten putem emaila.`
 
   return `<!DOCTYPE html>
 <html lang="sr">

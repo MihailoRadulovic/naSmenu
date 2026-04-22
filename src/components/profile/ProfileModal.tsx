@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, LogOut, KeyRound } from 'lucide-react'
+import { X, LogOut, KeyRound, Trash2, Download } from 'lucide-react'
 import { signOut } from 'next-auth/react'
+import Link from 'next/link'
 import { useFeaturesContext } from '@/components/providers/FeaturesProvider'
 import type { Features } from '@/components/providers/FeaturesProvider'
 
@@ -30,6 +31,10 @@ export function ProfileModal({ onClose }: Props) {
   const [sendingReset, setSendingReset] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setVisible(true))
@@ -103,6 +108,30 @@ export function ProfileModal({ onClose }: Props) {
     }
   }
 
+  async function handleDeleteAccount() {
+    if (!deletePassword) { setDeleteError('Unesite lozinku.'); return }
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      const res = await fetch('/api/account', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: deletePassword }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setDeleteError(json.error ?? 'Greška pri brisanju naloga.')
+        setDeleting(false)
+        return
+      }
+      // Account deleted — sign out and redirect
+      await signOut({ callbackUrl: '/login' })
+    } catch {
+      setDeleteError('Greška pri povezivanju sa serverom.')
+      setDeleting(false)
+    }
+  }
+
   // Map feature key → API field name
   const FEATURE_API_MAP: Record<keyof Features, string> = {
     salaryCalc:    'featureSalary',
@@ -170,7 +199,7 @@ export function ProfileModal({ onClose }: Props) {
                   type="text"
                   value={cafeName}
                   onChange={(e) => setCafeName(e.target.value)}
-                  className="w-full rounded-card border border-border bg-bg-tertiary px-4 py-3 text-sm text-text-primary outline-none transition-colors focus:border-accent-green/50"
+                  className="w-full rounded-card border border-border bg-bg-tertiary px-4 py-3 text-base text-text-primary outline-none transition-colors focus:border-accent-green/50"
                 />
               </div>
 
@@ -183,7 +212,7 @@ export function ProfileModal({ onClose }: Props) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-card border border-border bg-bg-tertiary px-4 py-3 text-sm text-text-primary outline-none transition-colors focus:border-accent-green/50"
+                  className="w-full rounded-card border border-border bg-bg-tertiary px-4 py-3 text-base text-text-primary outline-none transition-colors focus:border-accent-green/50"
                 />
               </div>
 
@@ -239,6 +268,69 @@ export function ProfileModal({ onClose }: Props) {
                 ))}
               </div>
 
+              {/* Export podataka (GDPR) */}
+              <div className="flex flex-col gap-2">
+                <div className="border-t border-border" />
+                <p className="text-xs font-medium text-text-muted uppercase tracking-wide pt-1">Vaši podaci</p>
+                <a
+                  href="/api/account/export"
+                  download
+                  className="flex items-center gap-2 rounded-card border border-border bg-bg-tertiary px-4 py-3 text-sm text-text-secondary transition-colors hover:border-accent-green/40 hover:text-text-primary"
+                >
+                  <Download size={15} className="text-accent-green" />
+                  Preuzmi sve moje podatke (JSON)
+                </a>
+              </div>
+
+              {/* Danger zone */}
+              <div className="flex flex-col gap-2">
+                <div className="border-t border-border" />
+                <p className="text-xs font-medium text-accent-red/70 uppercase tracking-wide pt-1">Opasna zona</p>
+
+                {!showDeleteConfirm ? (
+                  <button
+                    type="button"
+                    onClick={() => { setShowDeleteConfirm(true); setDeleteError('') }}
+                    className="flex items-center gap-2 rounded-card border border-accent-red/30 bg-accent-red/5 px-4 py-3 text-sm text-accent-red transition-colors hover:bg-accent-red/10"
+                  >
+                    <Trash2 size={15} />
+                    Obriši nalog i sve podatke
+                  </button>
+                ) : (
+                  <div className="flex flex-col gap-3 rounded-card border border-accent-red/40 bg-accent-red/5 p-4">
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      Ova akcija je <strong className="text-accent-red">nepovratna</strong>. Biće obrisani nalog, svi zaposleni i svi rasporedi. Unesite lozinku za potvrdu.
+                    </p>
+                    <input
+                      type="password"
+                      value={deletePassword}
+                      onChange={(e) => setDeletePassword(e.target.value)}
+                      placeholder="Vaša lozinka"
+                      autoComplete="current-password"
+                      className="w-full rounded-card border border-accent-red/30 bg-bg-primary px-4 py-2.5 text-sm text-text-primary outline-none focus:border-accent-red/60"
+                    />
+                    {deleteError && <p className="text-xs text-accent-red">{deleteError}</p>}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setShowDeleteConfirm(false); setDeletePassword(''); setDeleteError('') }}
+                        className="flex-1 rounded-pill border border-border py-2 text-xs text-text-secondary transition-colors hover:bg-bg-tertiary"
+                      >
+                        Otkaži
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDeleteAccount}
+                        disabled={deleting}
+                        className="flex-1 rounded-pill bg-accent-red py-2 text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+                      >
+                        {deleting ? 'Brisanje...' : 'Obriši nalog'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
             </div>
           )}
         </div>
@@ -259,6 +351,15 @@ export function ProfileModal({ onClose }: Props) {
             <LogOut size={16} />
             Odjavi se
           </button>
+          <div className="flex items-center justify-center gap-3 pt-1">
+            <Link href="/privacy" onClick={handleClose} className="text-xs text-text-muted hover:text-text-secondary transition-colors">
+              Privatnost
+            </Link>
+            <span className="text-xs text-border">·</span>
+            <Link href="/terms" onClick={handleClose} className="text-xs text-text-muted hover:text-text-secondary transition-colors">
+              Uslovi
+            </Link>
+          </div>
         </div>
 
       </div>

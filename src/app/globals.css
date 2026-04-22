@@ -82,7 +82,7 @@ html.light textarea {
   margin: 0 auto;
   min-height: 100dvh;
   position: relative;
-  padding-bottom: 90px;
+  padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Remove tap highlight */
@@ -111,6 +111,16 @@ button:active, a:active, [role="button"]:active {
 
 @media (display-mode: standalone) {
   body { overscroll-behavior: none; }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .rounded-pill {

@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy: { startDate: 'desc' },
+      take: 200,
     })
     return NextResponse.json({ data: weeks })
   } catch (error) {
@@ -96,20 +97,22 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      await prisma.scheduleEntry.deleteMany({ where: { weekId: week.id } })
-      if (entries.length > 0) {
-        await prisma.scheduleEntry.createMany({
-          data: entries.map((e: { day: number; employeeId: number; shiftType: string; halfShift: boolean; middleStart?: number | null; middleEnd?: number | null }) => ({
-            weekId: week.id,
-            day: e.day,
-            employeeId: e.employeeId,
-            shiftType: e.shiftType,
-            halfShift: e.halfShift ?? false,
-            middleStart: e.shiftType === 'middle' ? (e.middleStart ?? null) : null,
-            middleEnd: e.shiftType === 'middle' ? (e.middleEnd ?? null) : null,
-          })),
-        })
-      }
+      await prisma.$transaction(async (tx) => {
+        await tx.scheduleEntry.deleteMany({ where: { weekId: week.id } })
+        if (entries.length > 0) {
+          await tx.scheduleEntry.createMany({
+            data: entries.map((e: { day: number; employeeId: number; shiftType: string; halfShift: boolean; middleStart?: number | null; middleEnd?: number | null }) => ({
+              weekId: week.id,
+              day: e.day,
+              employeeId: e.employeeId,
+              shiftType: e.shiftType,
+              halfShift: e.halfShift ?? false,
+              middleStart: e.shiftType === 'middle' ? (e.middleStart ?? null) : null,
+              middleEnd: e.shiftType === 'middle' ? (e.middleEnd ?? null) : null,
+            })),
+          })
+        }
+      })
     }
 
     const result = await prisma.week.findUnique({

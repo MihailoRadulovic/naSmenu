@@ -100,8 +100,9 @@ export default function ForgotPasswordPage() {
         ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
-              <label style={labelStyle}>Email adresa</label>
+              <label htmlFor="fp-email" style={labelStyle}>Email adresa</label>
               <input
+                id="fp-email"
                 type="email" value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="vasa@email.com" required

@@ -16,9 +16,9 @@ const variantStyles = {
 }
 
 const sizeStyles = {
-  sm: 'px-3 py-1.5 text-xs',
-  md: 'px-5 py-2.5 text-sm',
-  lg: 'px-6 py-3 text-base',
+  sm: 'px-3 py-2 text-xs min-h-[36px]',
+  md: 'px-5 py-2.5 text-sm min-h-[44px]',
+  lg: 'px-6 py-3 text-base min-h-[44px]',
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(

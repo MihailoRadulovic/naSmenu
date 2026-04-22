@@ -38,7 +38,7 @@ interface EmployeeData {
   days: DayEntry[]
 }
 
-type FilterType = 'first' | 'second' | 'middle' | 'off'
+type FilterType = 'first' | 'second' | 'middle' | 'off' | 'sick_leave' | 'vacation' | 'late'
 
 function formatCount(value: number): string {
   return value % 1 === 0 ? String(value) : value.toFixed(1)
@@ -80,8 +80,26 @@ function shiftLabel(
         text: 'Slobodan',
         colorClass: 'bg-accent-red/10 text-accent-red border-accent-red/25',
       }
+    case 'sick_leave':
+      return {
+        emoji: '🤒',
+        text: halfShift ? 'Bolovanje (½)' : 'Bolovanje',
+        colorClass: 'bg-accent-yellow/15 text-[#92400E] border-accent-yellow/30',
+      }
+    case 'vacation':
+      return {
+        emoji: '🏖️',
+        text: halfShift ? 'Godišnji (½)' : 'Godišnji odmor',
+        colorClass: 'bg-accent-blue/15 text-accent-blue-dark border-accent-blue/30',
+      }
+    case 'late':
+      return {
+        emoji: '⏰',
+        text: halfShift ? 'Kašnjenje (½)' : 'Kašnjenje',
+        colorClass: 'bg-[#F59E0B]/15 text-[#92400E] border-[#F59E0B]/30',
+      }
     default:
-      return { emoji: '', text: '', colorClass: '' }
+      return { emoji: '', text: shiftType, colorClass: 'bg-bg-tertiary text-text-muted border-border' }
   }
 }
 

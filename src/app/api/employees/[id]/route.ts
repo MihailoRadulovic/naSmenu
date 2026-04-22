@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from '@/lib/auth'
+import { z } from 'zod'
+
+const updateSchema = z.object({
+  name: z.string().min(1, 'Ime je obavezno.').max(100).transform(s => s.trim()),
+  notes: z.string().max(500).optional().nullable(),
+  hourlyRate: z.number().min(0).max(100_000).optional().nullable(),
+})
 
 export async function PUT(
   request: NextRequest,
@@ -16,21 +23,27 @@ export async function PUT(
     if (isNaN(employeeId)) {
       return NextResponse.json({ error: 'Nevažeći ID zaposlenog.' }, { status: 400 })
     }
-    const body = await request.json()
-    const { name, notes } = body
 
-    if (!name?.trim()) {
-      return NextResponse.json({ error: 'Ime je obavezno.' }, { status: 400 })
+    const body = await request.json()
+    const parsed = updateSchema.safeParse(body)
+
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? 'Nevažeći unos.'
+      return NextResponse.json({ error: message }, { status: 400 })
     }
 
-    const existing = await prisma.employee.findFirst({ where: { id: employeeId, userId } })
+    const { name, notes } = parsed.data
+
+    const existing = await prisma.employee.findFirst({
+      where: { id: employeeId, userId, deletedAt: null },
+    })
     if (!existing) {
       return NextResponse.json({ error: 'Zaposleni nije pronađen.' }, { status: 404 })
     }
 
     const employee = await prisma.employee.update({
       where: { id: employeeId },
-      data: { name: name.trim(), notes: notes?.trim() || null },
+      data: { name, notes: notes?.trim() || null },
     })
 
     return NextResponse.json({ data: employee })
@@ -51,14 +64,22 @@ export async function DELETE(
 
     const { id } = await params
     const employeeId = parseInt(id)
+    if (isNaN(employeeId)) {
+      return NextResponse.json({ error: 'Nevažeći ID zaposlenog.' }, { status: 400 })
+    }
 
-    const existing = await prisma.employee.findFirst({ where: { id: employeeId, userId } })
+    const existing = await prisma.employee.findFirst({
+      where: { id: employeeId, userId, deletedAt: null },
+    })
     if (!existing) {
       return NextResponse.json({ error: 'Zaposleni nije pronađen.' }, { status: 404 })
     }
 
-    await prisma.scheduleEntry.deleteMany({ where: { employeeId } })
-    await prisma.employee.delete({ where: { id: employeeId } })
+    // Soft delete — čuvamo zaposlenog i sve istorijske smene za statistiku
+    await prisma.employee.update({
+      where: { id: employeeId },
+      data: { isActive: false, deletedAt: new Date() },
+    })
 
     return NextResponse.json({ data: { success: true } })
   } catch (error) {
@@ -78,8 +99,13 @@ export async function PATCH(
 
     const { id } = await params
     const employeeId = parseInt(id)
+    if (isNaN(employeeId)) {
+      return NextResponse.json({ error: 'Nevažeći ID zaposlenog.' }, { status: 400 })
+    }
 
-    const existing = await prisma.employee.findFirst({ where: { id: employeeId, userId } })
+    const existing = await prisma.employee.findFirst({
+      where: { id: employeeId, userId, deletedAt: null },
+    })
     if (!existing) {
       return NextResponse.json({ error: 'Zaposleni nije pronađen.' }, { status: 404 })
     }

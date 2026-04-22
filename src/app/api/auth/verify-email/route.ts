@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendAdminApprovalEmail } from '@/lib/email'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,16 +15,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login?error=invalid-token', request.url))
     }
 
+    // Provjera expiry (24h)
+    if (user.verificationTokenExpiry && user.verificationTokenExpiry < new Date()) {
+      // Poništi token da se ne može ponovo koristiti
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { verificationToken: null, verificationTokenExpiry: null },
+      })
+      return NextResponse.redirect(new URL('/login?error=token-expired', request.url))
+    }
+
     await prisma.user.update({
       where: { id: user.id },
-      data: { emailVerified: true, verificationToken: null },
+      data: { emailVerified: true, verificationToken: null, verificationTokenExpiry: null },
     })
-
-    try {
-      await sendAdminApprovalEmail(user.id, user.cafeName, user.email)
-    } catch (emailError) {
-      console.error('[verify-email] Admin notifikacija nije poslata:', emailError)
-    }
 
     return NextResponse.redirect(new URL('/login?verified=1', request.url))
   } catch (error) {

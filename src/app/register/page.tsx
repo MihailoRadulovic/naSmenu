@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useId } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ThemeToggleButton } from '@/components/layout/ThemeToggleButton'
@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const errorId = useId()
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -22,8 +23,8 @@ export default function RegisterPage() {
       setError('Lozinke se ne poklapaju.')
       return
     }
-    if (password.length < 6) {
-      setError('Lozinka mora imati najmanje 6 karaktera.')
+    if (password.length < 8) {
+      setError('Lozinka mora imati najmanje 8 karaktera.')
       return
     }
 
@@ -59,22 +60,20 @@ export default function RegisterPage() {
       alignItems: 'center', justifyContent: 'center',
       padding: '24px', overflowY: 'auto',
     }}>
-      {/* Theme toggle — gore desno */}
       <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
         <ThemeToggleButton />
       </div>
 
       <div style={{ width: '100%', maxWidth: '380px', paddingBlock: '24px' }}>
-        {/* Branding */}
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <Image
             src="/logo-icon.png"
-            alt="naSmenu"
+            alt="naSmenu logo"
             width={90}
             height={90}
+            sizes="90px"
             style={{ margin: '-16px auto 8px', display: 'block' }}
             priority
-            unoptimized
           />
           <h1 style={{
             color: 'var(--color-text-primary)', fontSize: '1.6rem',
@@ -89,40 +88,40 @@ export default function RegisterPage() {
         </div>
 
         {done ? (
-          /* Uspešna registracija — proveri email */
           <div style={{
-            textAlign: 'center',
-            padding: '32px 24px',
-            borderRadius: '16px',
-            border: '1px solid rgba(45,212,160,0.3)',
-            background: 'rgba(45,212,160,0.06)',
+            textAlign: 'center', padding: '32px 24px', borderRadius: '16px',
+            border: '1px solid rgba(45,212,160,0.3)', background: 'rgba(45,212,160,0.06)',
           }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>📬</div>
+            <div style={{ fontSize: '2.5rem', marginBottom: '16px' }} aria-hidden="true">📬</div>
             <h2 style={{ color: 'var(--color-text-primary)', fontSize: '1.2rem', fontWeight: 700, margin: '0 0 10px' }}>
               Proverite inbox!
             </h2>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', margin: '0 0 24px', lineHeight: 1.5 }}>
-              Poslali smo verifikacioni email na <strong style={{ color: 'var(--color-text-secondary)' }}>{email}</strong>.
+              Poslali smo verifikacioni email na{' '}
+              <strong style={{ color: 'var(--color-text-secondary)' }}>{email}</strong>.
               Kliknite na link u emailu da aktivirate nalog.
             </p>
             <Link
               href="/login"
               style={{
-                display: 'inline-block', padding: '12px 28px',
-                borderRadius: '999px', background: '#2DD4A0',
-                color: '#0A0A0A', fontWeight: 700, fontSize: '0.95rem',
-                textDecoration: 'none',
+                display: 'inline-block', padding: '12px 28px', borderRadius: '999px',
+                background: '#2DD4A0', color: '#0A0A0A', fontWeight: 700,
+                fontSize: '0.95rem', textDecoration: 'none',
               }}
             >
               Idi na prijavu
             </Link>
           </div>
         ) : (
-          /* Forma */
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
+            aria-describedby={error ? errorId : undefined}
+          >
             <div>
-              <label style={labelStyle}>Email</label>
+              <label htmlFor="reg-email" style={labelStyle}>
+                Email <span aria-hidden="true" style={{ color: 'var(--color-accent-red)' }}>*</span>
+              </label>
               <input
+                id="reg-email"
                 type="email" value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="primer@gmail.com" required
@@ -130,25 +129,36 @@ export default function RegisterPage() {
               />
             </div>
             <div>
-              <label style={labelStyle}>Naziv kafića / lokala</label>
+              <label htmlFor="reg-cafe" style={labelStyle}>
+                Naziv kafića / lokala <span aria-hidden="true" style={{ color: 'var(--color-accent-red)' }}>*</span>
+              </label>
               <input
+                id="reg-cafe"
                 type="text" value={cafeName}
                 onChange={e => setCafeName(e.target.value)}
-                placeholder="Naziv Lokala" required style={inputStyle}
+                placeholder="Naziv Lokala" required
+                autoComplete="organization" style={inputStyle}
               />
             </div>
             <div>
-              <label style={labelStyle}>Lozinka</label>
+              <label htmlFor="reg-password" style={labelStyle}>
+                Lozinka <span aria-hidden="true" style={{ color: 'var(--color-accent-red)' }}>*</span>
+              </label>
               <input
+                id="reg-password"
                 type="password" value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Min. 6 karaktera" required
+                placeholder="Min. 8 karaktera" required
+                minLength={8}
                 autoComplete="new-password" style={inputStyle}
               />
             </div>
             <div>
-              <label style={labelStyle}>Potvrda lozinke</label>
+              <label htmlFor="reg-confirm" style={labelStyle}>
+                Potvrda lozinke <span aria-hidden="true" style={{ color: 'var(--color-accent-red)' }}>*</span>
+              </label>
               <input
+                id="reg-confirm"
                 type="password" value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="Ponovite lozinku" required
@@ -157,14 +167,17 @@ export default function RegisterPage() {
             </div>
 
             {error && (
-              <p style={{ color: '#EF4444', fontSize: '0.875rem', margin: 0 }}>{error}</p>
+              <p id={errorId} role="alert" aria-live="assertive"
+                style={{ color: '#EF4444', fontSize: '0.875rem', margin: 0 }}>
+                {error}
+              </p>
             )}
 
             <button
               type="submit" disabled={loading}
+              aria-busy={loading}
               style={{
-                marginTop: '4px', padding: '14px',
-                borderRadius: '999px',
+                marginTop: '4px', padding: '14px', borderRadius: '999px',
                 background: loading ? 'rgba(45,212,160,0.5)' : '#2DD4A0',
                 color: '#0A0A0A', fontWeight: 700, fontSize: '1rem',
                 border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
@@ -184,6 +197,13 @@ export default function RegisterPage() {
             </Link>
           </p>
         )}
+
+        <p style={{ textAlign: 'center', marginTop: '24px', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+          Registracijom prihvatate{' '}
+          <Link href="/terms" style={{ color: 'var(--color-text-muted)', textDecoration: 'underline' }}>uslove korišćenja</Link>
+          {' i '}
+          <Link href="/privacy" style={{ color: 'var(--color-text-muted)', textDecoration: 'underline' }}>politiku privatnosti</Link>.
+        </p>
       </div>
     </div>
   )

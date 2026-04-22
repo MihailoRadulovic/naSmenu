@@ -14,6 +14,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Lozinka', type: 'password' },
+        rememberMe: { label: 'Zapamti me', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
@@ -34,6 +35,7 @@ export const authOptions: NextAuthOptions = {
           id: String(user.id),
           email: user.email,
           name: user.cafeName,
+          rememberMe: credentials.rememberMe === 'true',
         }
       },
     }),
@@ -43,6 +45,10 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.userId = parseInt(user.id)
         token.cafeName = user.name as string
+        // Shorter session for users who didn't check "Zapamti me"
+        if (!(user as { rememberMe?: boolean }).rememberMe) {
+          token.exp = Math.floor(Date.now() / 1000) + 24 * 60 * 60 // 1 day
+        }
       }
       return token
     },

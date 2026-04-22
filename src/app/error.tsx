@@ -16,7 +16,7 @@ export default function Error({ error, reset }: ErrorProps) {
           Došlo je do greške
         </h2>
         <p className="text-sm text-text-muted">
-          {error.message || 'Neočekivana greška.'}
+          Neočekivana greška. Pokušajte ponovo.
         </p>
       </div>
       <button

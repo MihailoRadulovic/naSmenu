@@ -3,6 +3,12 @@ import { prisma } from '@/lib/prisma'
 import { getShiftHours } from '@/lib/shiftHours'
 import { parseHoursFromSettings } from '@/lib/shiftSettings'
 import { getServerSession } from '@/lib/auth'
+import { z } from 'zod'
+
+const updateSchema = z.object({
+  employeeId: z.number().int().positive(),
+  hourlyRate: z.union([z.number().min(0).max(100_000), z.null(), z.literal('')]),
+})
 
 // GET /api/salary?month=3&year=2026
 // Returns all employees with their hourlyRate + total hours for the month
@@ -81,19 +87,18 @@ export async function PUT(request: NextRequest) {
     const userId = session.user.id
 
     const body = await request.json()
-    const { employeeId, hourlyRate } = body
+    const parsed = updateSchema.safeParse(body)
 
-    if (!employeeId) {
-      return NextResponse.json({ error: 'employeeId je obavezan.' }, { status: 400 })
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? 'Nevažeći unos.'
+      return NextResponse.json({ error: message }, { status: 400 })
     }
 
-    const parsedRate = hourlyRate !== '' && hourlyRate !== null ? Number(hourlyRate) : null
-    if (parsedRate !== null && isNaN(parsedRate)) {
-      return NextResponse.json({ error: 'hourlyRate mora biti broj.' }, { status: 400 })
-    }
+    const { employeeId, hourlyRate } = parsed.data
+    const parsedRate = hourlyRate === '' || hourlyRate === null ? null : hourlyRate
 
     const employee = await prisma.employee.update({
-      where: { id: Number(employeeId), userId },
+      where: { id: employeeId, userId },
       data: { hourlyRate: parsedRate },
     })
 

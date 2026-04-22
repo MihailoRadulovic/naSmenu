@@ -2,6 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
+// eslint-config-next already bundles eslint-plugin-jsx-a11y — no need to re-register
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,

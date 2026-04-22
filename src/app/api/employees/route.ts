@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from '@/lib/auth'
+import { z } from 'zod'
+
+const createSchema = z.object({
+  name: z.string().min(1, 'Ime i prezime su obavezni.').max(100).transform(s => s.trim()),
+  notes: z.string().max(500).optional().nullable(),
+  hourlyRate: z.number().min(0).max(100_000).optional().nullable(),
+})
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +19,9 @@ export async function GET(request: NextRequest) {
     const showAll = searchParams.get('all') === 'true'
 
     const employees = await prisma.employee.findMany({
-      where: showAll ? { userId } : { userId, isActive: true },
+      where: showAll
+        ? { userId, deletedAt: null }
+        : { userId, isActive: true, deletedAt: null },
       orderBy: { name: 'asc' },
     })
 
@@ -30,14 +39,22 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id
 
     const body = await request.json()
-    const { name } = body
+    const parsed = createSchema.safeParse(body)
 
-    if (!name?.trim()) {
-      return NextResponse.json({ error: 'Ime i prezime su obavezni.' }, { status: 400 })
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? 'Nevažeći unos.'
+      return NextResponse.json({ error: message }, { status: 400 })
     }
 
+    const { name, notes, hourlyRate } = parsed.data
+
     const employee = await prisma.employee.create({
-      data: { name: name.trim(), userId },
+      data: {
+        name,
+        userId,
+        notes: notes?.trim() || null,
+        hourlyRate: hourlyRate ?? null,
+      },
     })
 
     return NextResponse.json({ data: employee }, { status: 201 })

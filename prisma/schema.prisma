@@ -14,9 +14,11 @@ model User {
   passwordHash      String
   emailVerified     Boolean    @default(false)
   isApproved        Boolean    @default(false)
-  verificationToken String?    @unique
-  resetToken        String?    @unique
-  resetTokenExpiry  DateTime?
+  verificationToken       String?    @unique
+  verificationTokenExpiry DateTime?
+  resetToken              String?    @unique
+  resetTokenExpiry        DateTime?
+  approvalToken           String?    @unique
   createdAt         DateTime   @default(now())
   employees         Employee[]
   weeks             Week[]
@@ -27,6 +29,7 @@ model Employee {
   id         Int             @id @default(autoincrement())
   name       String
   isActive   Boolean         @default(true)
+  deletedAt  DateTime?
   hourlyRate Float?
   notes      String?
   createdAt  DateTime        @default(now())
@@ -36,6 +39,7 @@ model Employee {
 
   @@index([isActive])
   @@index([userId])
+  @@index([userId, deletedAt])
 }
 
 model Week {
@@ -49,6 +53,7 @@ model Week {
 
   @@unique([startDate, userId])
   @@index([userId])
+  @@index([userId, startDate])
 }
 
 model Settings {

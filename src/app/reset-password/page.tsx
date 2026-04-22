@@ -23,8 +23,8 @@ function ResetForm() {
       setError('Lozinke se ne poklapaju.')
       return
     }
-    if (password.length < 6) {
-      setError('Lozinka mora imati najmanje 6 karaktera.')
+    if (password.length < 8) {
+      setError('Lozinka mora imati najmanje 8 karaktera.')
       return
     }
 
@@ -102,17 +102,19 @@ function ResetForm() {
       ) : (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div>
-            <label style={labelStyle}>Nova lozinka</label>
+            <label htmlFor="rp-password" style={labelStyle}>Nova lozinka</label>
             <input
+              id="rp-password"
               type="password" value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Min. 6 karaktera" required
+              placeholder="Min. 8 karaktera" required
               autoComplete="new-password" style={inputStyle}
             />
           </div>
           <div>
-            <label style={labelStyle}>Potvrda lozinke</label>
+            <label htmlFor="rp-confirm" style={labelStyle}>Potvrda lozinke</label>
             <input
+              id="rp-confirm"
               type="password" value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
               placeholder="Ponovite lozinku" required

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent, useEffect } from 'react'
+import { useState, FormEvent, useEffect, useId } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -11,23 +11,26 @@ import { Suspense } from 'react'
 function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(true)
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
+  const errorId = useId()
+  const infoId = useId()
 
   useEffect(() => {
+    // Prefill samo email (nikad lozinku) iz sessionStorage
     const savedEmail = sessionStorage.getItem('prefill_email')
-    const savedPassword = sessionStorage.getItem('prefill_password')
     if (savedEmail) { setEmail(savedEmail); sessionStorage.removeItem('prefill_email') }
-    if (savedPassword) { setPassword(savedPassword); sessionStorage.removeItem('prefill_password') }
 
     if (searchParams.get('verified') === '1') {
       setInfo('Email je potvrđen! Nalog čeka odobrenje — javiću ti se kad bude aktivan.')
     } else if (searchParams.get('error') === 'invalid-token') {
-      setError('Link za verifikaciju nije validan ili je istekao.')
+      setError('Link za verifikaciju nije validan.')
+    } else if (searchParams.get('error') === 'token-expired') {
+      setError('Link za verifikaciju je istekao. Registrujte se ponovo.')
     }
   }, [searchParams])
 
@@ -40,6 +43,7 @@ function LoginForm() {
     const result = await signIn('credentials', {
       email,
       password,
+      rememberMe: String(rememberMe),
       redirect: false,
     })
 
@@ -65,22 +69,20 @@ function LoginForm() {
       alignItems: 'center', justifyContent: 'center',
       padding: '24px',
     }}>
-      {/* Theme toggle — gore desno */}
       <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
         <ThemeToggleButton />
       </div>
 
       <div style={{ width: '100%', maxWidth: '380px' }}>
-        {/* Branding */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <Image
             src="/logo-icon.png"
-            alt="naSmenu"
+            alt="naSmenu logo"
             width={90}
             height={90}
+            sizes="90px"
             style={{ margin: '-16px auto 8px', display: 'block' }}
             priority
-            unoptimized
           />
           <h1 style={{
             color: 'var(--color-text-primary)', fontSize: '1.6rem',
@@ -94,11 +96,15 @@ function LoginForm() {
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
+          aria-describedby={error ? errorId : info ? infoId : undefined}
+        >
           <div>
-            <label style={labelStyle}>Email</label>
+            <label htmlFor="login-email" style={labelStyle}>
+              Email <span aria-hidden="true" style={{ color: 'var(--color-accent-red)' }}>*</span>
+            </label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -111,12 +117,15 @@ function LoginForm() {
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Lozinka</label>
+              <label htmlFor="login-password" style={{ ...labelStyle, marginBottom: 0 }}>
+                Lozinka <span aria-hidden="true" style={{ color: 'var(--color-accent-red)' }}>*</span>
+              </label>
               <Link href="/forgot-password" style={{ color: '#2DD4A0', fontSize: '0.8rem', textDecoration: 'none' }}>
                 Zaboravio si lozinku?
               </Link>
             </div>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -127,23 +136,27 @@ function LoginForm() {
             />
           </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
             <input
               type="checkbox"
               checked={rememberMe}
               onChange={e => setRememberMe(e.target.checked)}
               style={{ width: '16px', height: '16px', accentColor: '#2DD4A0', cursor: 'pointer' }}
             />
-            <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-              Zapamti me
+            <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+              Zapamti me (30 dana)
             </span>
           </label>
 
           {info && (
-            <p style={{ color: '#2DD4A0', fontSize: '0.875rem', margin: 0 }}>{info}</p>
+            <p id={infoId} role="status" aria-live="polite" style={{ color: '#2DD4A0', fontSize: '0.875rem', margin: 0 }}>
+              {info}
+            </p>
           )}
           {error && (
-            <p style={{ color: '#EF4444', fontSize: '0.875rem', margin: 0 }}>{error}</p>
+            <p id={errorId} role="alert" aria-live="assertive" style={{ color: '#EF4444', fontSize: '0.875rem', margin: 0 }}>
+              {error}
+            </p>
           )}
 
           <button
@@ -157,6 +170,7 @@ function LoginForm() {
               border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'opacity 150ms', fontFamily: 'inherit',
             }}
+            aria-busy={loading}
           >
             {loading ? 'Prijavljivanje...' : 'Prijavi se'}
           </button>
@@ -167,6 +181,12 @@ function LoginForm() {
           <Link href="/register" style={{ color: '#2DD4A0', textDecoration: 'none', fontWeight: 600 }}>
             Registrujte se
           </Link>
+        </p>
+
+        <p style={{ textAlign: 'center', marginTop: '32px', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+          <Link href="/privacy" style={{ color: 'var(--color-text-muted)', textDecoration: 'none' }}>Privatnost</Link>
+          {' · '}
+          <Link href="/terms" style={{ color: 'var(--color-text-muted)', textDecoration: 'none' }}>Uslovi</Link>
         </p>
       </div>
     </div>

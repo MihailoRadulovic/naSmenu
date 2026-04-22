@@ -12,7 +12,7 @@ const BASE_NAV_ITEMS = [
   { href: '/zaposleni', label: 'Zaposleni', icon: Users },
 ]
 
-const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email']
+const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/privacy', '/terms']
 
 export function BottomNav() {
   const pathname = usePathname()
@@ -37,7 +37,7 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`relative flex flex-col items-center gap-0.5 px-3 py-1 transition-colors duration-200 ${
+              className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 min-h-[44px] justify-center transition-colors duration-200 ${
                 isActive ? 'text-accent-green' : 'text-text-muted hover:text-text-secondary'
               }`}
             >

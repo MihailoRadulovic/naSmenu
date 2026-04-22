@@ -108,14 +108,7 @@ export function PrintScheduleButton({ weekData, bounds }: Props) {
           </tbody>
         </table>
 
-        {/* Legend */}
-        <div className="print-legend">
-          <span className="legend-item cell-first">Prva smena</span>
-          <span className="legend-item cell-second">Druga smena</span>
-          <span className="legend-item cell-middle">Međusmena</span>
-          <span className="legend-item cell-off">Slobodan dan</span>
-          <span className="legend-item cell-absence">Odsustvo</span>
-        </div>
+
       </div>, document.body)}
     </>
   )
