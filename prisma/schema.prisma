@@ -13,6 +13,7 @@ model User {
   cafeName          String
   passwordHash      String
   emailVerified     Boolean    @default(false)
+  isApproved        Boolean    @default(false)
   verificationToken String?    @unique
   resetToken        String?    @unique
   resetTokenExpiry  DateTime?

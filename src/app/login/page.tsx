@@ -24,7 +24,7 @@ function LoginForm() {
     if (savedPassword) { setPassword(savedPassword); sessionStorage.removeItem('prefill_password') }
 
     if (searchParams.get('verified') === '1') {
-      setInfo('Email je potvrđen! Možete se prijaviti.')
+      setInfo('Email je potvrđen! Nalog čeka odobrenje — javiću ti se kad bude aktivan.')
     } else if (searchParams.get('error') === 'invalid-token') {
       setError('Link za verifikaciju nije validan ili je istekao.')
     }
@@ -46,6 +46,8 @@ function LoginForm() {
 
     if (result?.error === 'EmailNotVerified') {
       setError('Email nije potvrđen. Proverite inbox i kliknite na link za aktivaciju.')
+    } else if (result?.error === 'NotApproved') {
+      setError('Nalog čeka odobrenje. Javićemo ti se čim bude aktivan.')
     } else if (result?.error) {
       setError('Pogrešan email ili lozinka.')
     } else {

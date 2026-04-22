@@ -78,6 +78,72 @@ export async function sendVerificationEmail(to: string, token: string) {
   }
 }
 
+export async function sendAdminApprovalEmail(userId: number, cafeName: string, userEmail: string) {
+  const adminEmail = process.env.ADMIN_EMAIL ?? 'mihailoradulovic711@gmail.com'
+  const approveUrl = `${BASE_URL}/api/admin/approve?userId=${userId}&secret=${process.env.ADMIN_SECRET}`
+
+  const result = await resend.emails.send({
+    from: FROM,
+    to: adminEmail,
+    subject: `Novi korisnik čeka odobrenje — ${cafeName}`,
+    html: emailWrapper(`
+      <h1 style="margin:0 0 10px;font-size:2rem;font-weight:900;color:#111827;letter-spacing:-0.5px;text-align:center;">
+        Novi korisnik
+      </h1>
+      <p style="margin:0 0 6px;font-size:0.8rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#0D9E72;text-align:center;">
+        Zahtev za registraciju
+      </p>
+      <div style="width:40px;height:3px;background:#0D9E72;border-radius:999px;margin:16px auto 28px;"></div>
+      <p style="margin:0 0 8px;font-size:0.95rem;color:#6B7280;line-height:1.7;text-align:center;">
+        Korisnik <strong style="color:#111827;">${cafeName}</strong> se registrovao i čeka tvoje odobrenje.
+      </p>
+      <p style="margin:0 0 32px;font-size:0.85rem;color:#9CA3AF;text-align:center;">${userEmail}</p>
+      <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding-bottom:32px;">
+        <a href="${approveUrl}" style="display:inline-block;padding:15px 40px;background:#0D9E72;color:#ffffff;font-weight:700;font-size:0.95rem;border-radius:999px;text-decoration:none;letter-spacing:0.3px;">
+          Odobri nalog
+        </a>
+      </td></tr></table>
+      <p style="margin:0;font-size:0.78rem;color:#B0B7C3;line-height:1.6;text-align:center;">
+        Klikni dugme da odobriš pristup korisniku.
+      </p>
+    `),
+  })
+
+  if (result.error) {
+    throw new Error(`Resend greška (admin approval): ${result.error.message}`)
+  }
+}
+
+export async function sendUserApprovedEmail(to: string, cafeName: string) {
+  const result = await resend.emails.send({
+    from: FROM,
+    to,
+    subject: 'Nalog odobren — naSmenu',
+    html: emailWrapper(`
+      <h1 style="margin:0 0 10px;font-size:2rem;font-weight:900;color:#111827;letter-spacing:-0.5px;text-align:center;">
+        Nalog odobren!
+      </h1>
+      <p style="margin:0 0 6px;font-size:0.8rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#0D9E72;text-align:center;">
+        Dobrodošli
+      </p>
+      <div style="width:40px;height:3px;background:#0D9E72;border-radius:999px;margin:16px auto 28px;"></div>
+      <p style="margin:0 0 32px;font-size:0.95rem;color:#6B7280;line-height:1.7;text-align:center;">
+        Tvoj nalog za <strong style="color:#111827;">${cafeName}</strong> je odobren.<br>
+        Sada se možeš prijaviti na naSmenu.
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding-bottom:32px;">
+        <a href="${BASE_URL}/login" style="display:inline-block;padding:15px 40px;background:#0D9E72;color:#ffffff;font-weight:700;font-size:0.95rem;border-radius:999px;text-decoration:none;letter-spacing:0.3px;">
+          Prijavi se
+        </a>
+      </td></tr></table>
+    `),
+  })
+
+  if (result.error) {
+    throw new Error(`Resend greška (user approved): ${result.error.message}`)
+  }
+}
+
 export async function sendPasswordResetEmail(to: string, token: string) {
   const url = `${BASE_URL}/reset-password?token=${token}`
 

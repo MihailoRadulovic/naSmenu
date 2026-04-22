@@ -28,6 +28,7 @@ export const authOptions: NextAuthOptions = {
         if (!isValid) return null
 
         if (!user.emailVerified) throw new Error('EmailNotVerified')
+        if (!user.isApproved) throw new Error('NotApproved')
 
         return {
           id: String(user.id),
