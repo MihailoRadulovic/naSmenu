@@ -72,22 +72,11 @@ function LoginForm() {
       <div style={{ width: '100%', maxWidth: '380px' }}>
         {/* Branding */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <div style={{
-            width: '64px', height: '64px', borderRadius: '18px',
-            background: 'rgba(45,212,160,0.12)',
-            border: '1.5px solid rgba(45,212,160,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px', fontSize: '1.8rem',
-          }}>
-            📋
-          </div>
-          <h1 style={{
-            color: 'var(--color-text-primary)', fontSize: '1.6rem',
-            fontWeight: 700, margin: 0,
-            fontFamily: 'var(--font-heading, system-ui)',
-          }}>
-            SmenaApp
-          </h1>
+          <img
+            src="/logo.png"
+            alt="naSmenu"
+            style={{ width: '120px', height: 'auto', margin: '0 auto 8px', display: 'block' }}
+          />
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: '6px' }}>
             Prijavite se na vaš nalog
           </p>

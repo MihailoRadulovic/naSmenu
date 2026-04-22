@@ -66,15 +66,11 @@ export default function RegisterPage() {
       <div style={{ width: '100%', maxWidth: '380px', paddingBlock: '24px' }}>
         {/* Branding */}
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <div style={{
-            width: '64px', height: '64px', borderRadius: '18px',
-            background: 'rgba(45,212,160,0.12)',
-            border: '1.5px solid rgba(45,212,160,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px', fontSize: '1.8rem',
-          }}>
-            📋
-          </div>
+          <img
+            src="/logo.png"
+            alt="naSmenu"
+            style={{ width: '120px', height: 'auto', margin: '0 auto 8px', display: 'block' }}
+          />
           <h1 style={{
             color: 'var(--color-text-primary)', fontSize: '1.6rem',
             fontWeight: 700, margin: 0,
