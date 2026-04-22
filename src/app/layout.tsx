@@ -34,6 +34,7 @@ export default function RootLayout({
     <html lang="sr" className={`${plusJakartaSans.variable} ${outfit.variable}`}>
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192" />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('theme');if(t==='light')document.documentElement.classList.add('light');})()` }} />
       </head>
       <body>
         <NextAuthProvider>
