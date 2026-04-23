@@ -5,6 +5,10 @@ import { ArrowDownUp, ArrowDown, ArrowUp } from 'lucide-react'
 import { useFeatures } from '@/lib/features'
 import { ThemeToggleButton } from '@/components/layout/ThemeToggleButton'
 import { useOffline } from '@/hooks/useOffline'
+import { Spinner } from '@/components/ui/Spinner'
+import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
+import { ErrorCard } from '@/components/ui/ErrorCard'
+import { cacheSet, cacheGet } from '@/lib/localCache'
 
 interface SalaryEntry {
   id: number
@@ -25,6 +29,7 @@ export default function SalaryPage() {
   const [year, setYear] = useState(now.getFullYear())
   const [data, setData] = useState<SalaryEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(false)
   const [saving, setSaving] = useState(false)
   const [localRates, setLocalRates] = useState<Record<number, string>>({})
   const [dirty, setDirty] = useState(false)
@@ -32,37 +37,39 @@ export default function SalaryPage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true)
+    setFetchError(false)
+    const cacheKey = `salary_${month}_${year}`
     try {
       const res = await fetch(`/api/salary?month=${month}&year=${year}`)
       const json = await res.json()
-      setData(json.data ?? [])
+      const entries: SalaryEntry[] = json.data ?? []
+      setData(entries)
+      cacheSet(cacheKey, entries)
       const rates: Record<number, string> = {}
-      for (const emp of json.data ?? []) {
+      for (const emp of entries) {
         rates[emp.id] = emp.hourlyRate !== null ? Number(emp.hourlyRate).toFixed(1) : ''
       }
       setLocalRates(rates)
       setDirty(false)
     } catch {
-      // handle error silently in demo
+      const cached = cacheGet<SalaryEntry[]>(cacheKey)
+      if (cached) {
+        setData(cached)
+        const rates: Record<number, string> = {}
+        for (const emp of cached) {
+          rates[emp.id] = emp.hourlyRate !== null ? Number(emp.hourlyRate).toFixed(1) : ''
+        }
+        setLocalRates(rates)
+        setDirty(false)
+      } else {
+        setFetchError(true)
+      }
     } finally {
       setLoading(false)
     }
   }, [month, year])
 
   useEffect(() => { fetchData() }, [fetchData])
-
-  if (!features.salaryCalc) {
-    return (
-      <div className="py-10 text-center text-text-muted">
-        <p>Kalkulator plata nije aktiviran za ovog klijenta.</p>
-      </div>
-    )
-  }
-
-  const totalEarned = data.reduce((acc, emp) => {
-    const rate = parseFloat(localRates[emp.id] ?? '0') || 0
-    return acc + (emp.totalHours * rate)
-  }, 0)
 
   const sortedData = useMemo(() => {
     if (!sort) return data
@@ -99,6 +106,19 @@ export default function SalaryPage() {
       setSaving(false)
     }
   }
+
+  if (!features.salaryCalc) {
+    return (
+      <div className="py-10 text-center text-text-muted">
+        <p>Kalkulator plata nije aktiviran za ovog klijenta.</p>
+      </div>
+    )
+  }
+
+  const totalEarned = data.reduce((acc, emp) => {
+    const rate = parseFloat(localRates[emp.id] ?? '0') || 0
+    return acc + (emp.totalHours * rate)
+  }, 0)
 
   return (
     <div className="pb-6">
@@ -160,7 +180,13 @@ export default function SalaryPage() {
       )}
 
       {loading ? (
-        <div className="py-10 text-center text-text-muted">Učitavanje...</div>
+        <div className="flex items-center justify-center py-16">
+          <Spinner size="lg" />
+        </div>
+      ) : fetchError ? (
+        isOffline
+          ? <OfflinePlaceholder message="Plate nisu dostupne bez interneta." />
+          : <ErrorCard message="Greška pri učitavanju plata." onRetry={fetchData} />
       ) : (
         <>
           {/* Employee cards */}

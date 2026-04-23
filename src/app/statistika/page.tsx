@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { Employee } from '@/types'
 import { StatsTabBar } from '@/components/statistics/StatsTabBar'
+import { cacheSet, cacheGet } from '@/lib/localCache'
 import { MonthYearPicker } from '@/components/statistics/MonthYearPicker'
 import { DateRangePicker } from '@/components/statistics/DateRangePicker'
 import { EmployeeFilter } from '@/components/statistics/EmployeeFilter'
@@ -48,9 +49,13 @@ export default function StatistikaPage() {
     try {
       const res = await fetch('/api/employees?all=true')
       const json = await res.json()
-      setAllEmployees(json.data ?? [])
+      const employees = json.data ?? []
+      setAllEmployees(employees)
+      cacheSet('employees_all', employees)
     } catch {
-      // Tiho ignoriši — filter jednostavno neće biti prikazan
+      const cached = cacheGet<Employee[]>('employees_all')
+      if (cached) setAllEmployees(cached)
+      // Ako nema keša — filter jednostavno neće biti prikazan
     }
   }, [])
 

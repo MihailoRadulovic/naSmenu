@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { cacheSet, cacheGet } from '@/lib/localCache'
 
 export interface Features {
   salaryCalc: boolean
@@ -32,7 +33,7 @@ const Ctx = createContext<FeaturesCtx>({ features: DEFAULT, updateFeature: () =>
 
 export function FeaturesProvider({ children }: { children: React.ReactNode }) {
   const { status } = useSession()
-  const [features, setFeatures] = useState<Features>(DEFAULT)
+  const [features, setFeatures] = useState<Features>(() => cacheGet<Features>('features_settings') ?? DEFAULT)
 
   useEffect(() => {
     if (status !== 'authenticated') return
@@ -40,7 +41,7 @@ export function FeaturesProvider({ children }: { children: React.ReactNode }) {
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
         if (!json?.data) return
-        setFeatures({
+        const f: Features = {
           salaryCalc: json.data.featureSalary ?? false,
           printSchedule: json.data.featurePrint ?? false,
           holidays: json.data.featureHolidays ?? false,
@@ -48,7 +49,9 @@ export function FeaturesProvider({ children }: { children: React.ReactNode }) {
           employeeNotes: json.data.featureNotes ?? false,
           copyWeek: json.data.featureCopyWeek ?? false,
           charts: json.data.featureCharts ?? false,
-        })
+        }
+        setFeatures(f)
+        cacheSet('features_settings', f)
       })
       .catch(() => {})
   }, [status])

@@ -6,6 +6,7 @@ import { ArrowLeft, Calendar } from 'lucide-react'
 import { DAY_NAMES } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
 import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
+import { ErrorCard } from '@/components/ui/ErrorCard'
 import { cacheSet, cacheGet } from '@/lib/localCache'
 import { MonthYearPicker } from './MonthYearPicker'
 
@@ -118,12 +119,15 @@ export function EmployeeDailyView({ employeeId, initialMonth, initialYear }: Emp
   const [data, setData] = useState<EmployeeData | null>(null)
   const [loading, setLoading] = useState(true)
   const [offlineError, setOfflineError] = useState(false)
+  const [fetchError, setFetchError] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
   const [activeFilters, setActiveFilters] = useState<Set<FilterType>>(new Set())
 
   useEffect(() => {
     setLoading(true)
     setActiveFilters(new Set())
     setOfflineError(false)
+    setFetchError(false)
     const cacheKey = `stats_employee_${employeeId}_${month}_${year}`
     fetch(`/api/stats/employee/${employeeId}?month=${month}&year=${year}`)
       .then((res) => res.json())
@@ -138,11 +142,11 @@ export function EmployeeDailyView({ employeeId, initialMonth, initialYear }: Emp
         } else if (!navigator.onLine) {
           setOfflineError(true)
         } else {
-          setData(null)
+          setFetchError(true)
         }
       })
       .finally(() => setLoading(false))
-  }, [employeeId, month, year])
+  }, [employeeId, month, year, retryCount])
 
   function toggleFilter(type: FilterType) {
     setActiveFilters((prev) => {
@@ -193,6 +197,11 @@ export function EmployeeDailyView({ employeeId, initialMonth, initialYear }: Emp
         </div>
       ) : offlineError ? (
         <OfflinePlaceholder message="Statistika zaposlenog nije dostupna bez interneta." />
+      ) : fetchError ? (
+        <ErrorCard
+          message="Greška pri učitavanju statistike."
+          onRetry={() => setRetryCount((c) => c + 1)}
+        />
       ) : !data ? (
         <div className="flex flex-col items-center justify-center gap-3 py-16 text-text-secondary">
           <Calendar size={48} className="text-text-muted" />

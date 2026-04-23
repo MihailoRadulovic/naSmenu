@@ -58,6 +58,7 @@ export function EmployeeList() {
   }
 
   async function handleToggleActive(id: number) {
+    if (isOffline) { showToast('Nije dostupno bez interneta', 'error'); return }
     const emp = employees.find((e) => e.id === id)
     await fetch(`/api/employees/${id}`, { method: 'PATCH' })
     fetchEmployees()
@@ -67,11 +68,13 @@ export function EmployeeList() {
   }
 
   function handleDelete(id: number) {
+    if (isOffline) { showToast('Nije dostupno bez interneta', 'error'); return }
     setConfirmDeleteId(id)
   }
 
   async function confirmDelete() {
     if (confirmDeleteId === null) return
+    if (isOffline) { showToast('Nije dostupno bez interneta', 'error'); setConfirmDeleteId(null); return }
     const employee = employees.find((e) => e.id === confirmDeleteId)
     setConfirmDeleteId(null)
     if (!employee) return
@@ -81,6 +84,7 @@ export function EmployeeList() {
   }
 
   async function handleSave(data: EmployeeFormData) {
+    if (isOffline) { showToast('Nije dostupno bez interneta', 'error'); return }
     if (editingEmployee) {
       await fetch(`/api/employees/${editingEmployee.id}`, {
         method: 'PUT',

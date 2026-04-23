@@ -16,6 +16,7 @@ import {
 } from '@/lib/dates'
 import { Spinner } from '@/components/ui/Spinner'
 import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
+import { ErrorCard } from '@/components/ui/ErrorCard'
 import { useOffline } from '@/hooks/useOffline'
 import { cacheSet, cacheGet } from '@/lib/localCache'
 import { ThemeToggleButton } from '@/components/layout/ThemeToggleButton'
@@ -71,12 +72,15 @@ export function ScheduleEditor() {
   const [saving, setSaving] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
   const [offlineError, setOfflineError] = useState(false)
+  const [loadError, setLoadError] = useState(false)
   const [copyingWeek, setCopyingWeek] = useState(false)
   // key = `${day}-${employeeId}`, value = { start: "HH:MM", end: "HH:MM" }
   const [middleTimes, setMiddleTimes] = useState<Record<string, { start: string; end: string }>>({})
 
   const loadData = useCallback(async (b: WeekBounds, weekId: number | null) => {
     setLoadingData(true)
+    setOfflineError(false)
+    setLoadError(false)
     const weekCacheKey = `week_${toISODateString(b.startDate)}`
     try {
       const empRes = await fetch('/api/employees')
@@ -151,7 +155,7 @@ export function ScheduleEditor() {
       } else if (!navigator.onLine) {
         setOfflineError(true)
       } else {
-        showToast('Greška pri učitavanju podataka', 'error')
+        setLoadError(true)
       }
     } finally {
       setLoadingData(false)
@@ -421,6 +425,11 @@ export function ScheduleEditor() {
         </div>
       ) : offlineError ? (
         <OfflinePlaceholder message="Editor rasporeda nije dostupan offline." />
+      ) : loadError ? (
+        <ErrorCard
+          message="Greška pri učitavanju podataka."
+          onRetry={() => loadData(bounds, existingWeekId)}
+        />
       ) : (
         <div className="flex flex-col gap-3">
           {[...BASE_SHIFT_SECTIONS, ...(features.absenceTypes ? ABSENCE_SHIFT_SECTIONS : [])].map(({ shiftType, emoji, label }) => {

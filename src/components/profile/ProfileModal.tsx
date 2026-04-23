@@ -6,6 +6,7 @@ import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useFeaturesContext } from '@/components/providers/FeaturesProvider'
 import type { Features } from '@/components/providers/FeaturesProvider'
+import { useOffline } from '@/hooks/useOffline'
 
 interface Props {
   onClose: () => void
@@ -23,6 +24,7 @@ const FEATURE_LIST: { key: keyof Features; label: string; description: string }[
 
 export function ProfileModal({ onClose }: Props) {
   const { features, updateFeature } = useFeaturesContext()
+  const isOffline = useOffline()
   const [visible, setVisible] = useState(false)
   const [cafeName, setCafeName] = useState('')
   const [email, setEmail] = useState('')
@@ -57,6 +59,7 @@ export function ProfileModal({ onClose }: Props) {
   }
 
   async function handleSave() {
+    if (isOffline) { setError('Nije dostupno bez interneta.'); return }
     setError('')
     setSuccess('')
     setSaving(true)
@@ -84,6 +87,7 @@ export function ProfileModal({ onClose }: Props) {
 
   async function handleSendReset() {
     if (!email) return
+    if (isOffline) { setError('Nije dostupno bez interneta.'); return }
     setError('')
     setSuccess('')
     setSendingReset(true)
@@ -110,6 +114,7 @@ export function ProfileModal({ onClose }: Props) {
 
   async function handleDeleteAccount() {
     if (!deletePassword) { setDeleteError('Unesite lozinku.'); return }
+    if (isOffline) { setDeleteError('Nije dostupno bez interneta.'); return }
     setDeleting(true)
     setDeleteError('')
     try {
@@ -144,6 +149,7 @@ export function ProfileModal({ onClose }: Props) {
   }
 
   async function toggleFeature(key: keyof Features, value: boolean) {
+    if (isOffline) { setError('Nije dostupno bez interneta.'); return }
     updateFeature(key, value)
     try {
       await fetch('/api/settings', {
@@ -339,10 +345,10 @@ export function ProfileModal({ onClose }: Props) {
         <div className="shrink-0 flex flex-col gap-3 px-6 py-5 border-t border-border">
           <button
             onClick={handleSave}
-            disabled={saving || loading}
+            disabled={saving || loading || isOffline}
             className="w-full rounded-pill bg-accent-green py-3 text-sm font-semibold text-white transition-all hover:bg-accent-green-dark active:scale-[0.97] disabled:opacity-50"
           >
-            {saving ? 'Čuvanje...' : 'Sačuvaj izmene'}
+            {saving ? 'Čuvanje...' : isOffline ? 'Nije dostupno bez interneta' : 'Sačuvaj izmene'}
           </button>
           <button
             onClick={() => signOut({ callbackUrl: '/login' })}
