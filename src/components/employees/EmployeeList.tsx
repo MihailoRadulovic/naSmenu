@@ -10,6 +10,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { Spinner } from '@/components/ui/Spinner'
 import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
 import { useOffline } from '@/hooks/useOffline'
+import { cacheSet, cacheGet } from '@/lib/localCache'
 import { EmployeeCard } from './EmployeeCard'
 import { EmployeeModal } from './EmployeeModal'
 
@@ -28,9 +29,15 @@ export function EmployeeList() {
       const res = await fetch('/api/employees?all=true')
       const json = await res.json()
       setEmployees(json.data)
+      cacheSet('employees_all', json.data)
     } catch (err) {
       console.error('Greška pri učitavanju zaposlenih:', err)
-      if (!navigator.onLine) setOfflineError(true)
+      const cached = cacheGet<Employee[]>('employees_all')
+      if (cached) {
+        setEmployees(cached)
+      } else {
+        setOfflineError(true)
+      }
     } finally {
       setLoading(false)
     }
@@ -104,7 +111,7 @@ export function EmployeeList() {
           <Spinner size="lg" />
         </div>
       ) : offlineError ? (
-        <OfflinePlaceholder message="Lista zaposlenih nije dostupna offline." />
+        <OfflinePlaceholder message="Lista zaposlenih nije dostupna bez interneta." />
       ) : employees.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 py-20 text-text-secondary">
           <Users size={48} className="text-text-muted" />

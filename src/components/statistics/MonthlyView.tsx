@@ -7,6 +7,7 @@ import type { EmployeeStats } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
 import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
+import { cacheSet, cacheGet } from '@/lib/localCache'
 import { EmployeeStatRow } from './EmployeeStatRow'
 import { MonthlyHoursChart } from './MonthlyHoursChart'
 import { useFeatures } from '@/lib/features'
@@ -36,10 +37,22 @@ export function MonthlyView({ month, year, filteredEmployeeIds }: MonthlyViewPro
     setLoading(true)
     setError(null)
 
+    const cacheKey = `stats_monthly_${month}_${year}`
     fetch(`/api/stats/monthly?month=${month}&year=${year}`)
       .then((res) => res.json())
-      .then((json) => setData(json.data ?? []))
-      .catch(() => setError(!navigator.onLine ? 'offline' : 'Greška pri učitavanju mesečnih statistika.'))
+      .then((json) => {
+        const d: EmployeeStats[] = json.data ?? []
+        setData(d)
+        cacheSet(cacheKey, d)
+      })
+      .catch(() => {
+        const cached = cacheGet<EmployeeStats[]>(cacheKey)
+        if (cached) {
+          setData(cached)
+        } else {
+          setError(!navigator.onLine ? 'offline' : 'Greška pri učitavanju mesečnih statistika.')
+        }
+      })
       .finally(() => setLoading(false))
   }, [month, year, retryCount])
 
@@ -75,7 +88,7 @@ export function MonthlyView({ month, year, filteredEmployeeIds }: MonthlyViewPro
 
   if (error) {
     return error === 'offline'
-      ? <OfflinePlaceholder message="Statistika nije dostupna offline." />
+      ? <OfflinePlaceholder message="Statistika nije dostupna bez interneta." />
       : <ErrorCard message={error} onRetry={() => setRetryCount((c) => c + 1)} />
   }
 

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Save, ArrowLeft, Info, Copy, Clock } from 'lucide-react'
-import type { Employee, WeekSchedule, ShiftType, DayAssignment, ScheduleEntryInput } from '@/types'
+import type { Employee, WeekSchedule, ShiftType, DayAssignment, ScheduleEntryInput, WeekWithEntries } from '@/types'
 import { DAY_NAMES, SHIFT_TYPES } from '@/types'
 import { minutesToTime, timeToMinutes } from '@/lib/shiftHours'
 import type { WeekBounds } from '@/types'
@@ -17,6 +17,7 @@ import {
 import { Spinner } from '@/components/ui/Spinner'
 import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
 import { useOffline } from '@/hooks/useOffline'
+import { cacheSet, cacheGet } from '@/lib/localCache'
 import { ThemeToggleButton } from '@/components/layout/ThemeToggleButton'
 import { useToast } from '@/contexts/ToastContext'
 import { WeekPicker } from './WeekPicker'
@@ -76,10 +77,12 @@ export function ScheduleEditor() {
 
   const loadData = useCallback(async (b: WeekBounds, weekId: number | null) => {
     setLoadingData(true)
+    const weekCacheKey = `week_${toISODateString(b.startDate)}`
     try {
       const empRes = await fetch('/api/employees')
       const empJson = await empRes.json()
       setEmployees(empJson.data ?? [])
+      cacheSet('employees', empJson.data ?? [])
 
       const url = weekId
         ? `/api/weeks/${weekId}`
@@ -87,6 +90,7 @@ export function ScheduleEditor() {
 
       const weekRes = await fetch(url)
       const weekJson = await weekRes.json()
+      cacheSet(weekCacheKey, weekJson.data ?? null)
 
       if (weekJson.data) {
         setExistingWeekId(weekJson.data.id)
@@ -117,7 +121,34 @@ export function ScheduleEditor() {
       }
     } catch (err) {
       console.error('Greška pri učitavanju podataka:', err)
-      if (!navigator.onLine) {
+      const cachedEmps = cacheGet<Employee[]>('employees')
+      const cachedWeek = cacheGet<WeekWithEntries | null>(weekCacheKey)
+      if (cachedEmps) {
+        setEmployees(cachedEmps)
+        if (cachedWeek) {
+          setExistingWeekId(cachedWeek.id)
+          const newSchedule: WeekSchedule = {}
+          const newMiddleTimes: Record<string, { start: string; end: string }> = {}
+          for (const entry of cachedWeek.entries) {
+            if (!newSchedule[entry.day]) newSchedule[entry.day] = {}
+            if (!newSchedule[entry.day][entry.employeeId]) newSchedule[entry.day][entry.employeeId] = []
+            newSchedule[entry.day][entry.employeeId].push({
+              shiftType: entry.shiftType as ShiftType,
+              halfShift: entry.halfShift,
+              middleStart: entry.middleStart ?? null,
+              middleEnd: entry.middleEnd ?? null,
+            })
+            if (entry.shiftType === 'middle' && entry.middleStart != null && entry.middleEnd != null) {
+              newMiddleTimes[`${entry.day}-${entry.employeeId}`] = {
+                start: minutesToTime(entry.middleStart),
+                end: minutesToTime(entry.middleEnd),
+              }
+            }
+          }
+          setSchedule(newSchedule)
+          setMiddleTimes(newMiddleTimes)
+        }
+      } else if (!navigator.onLine) {
         setOfflineError(true)
       } else {
         showToast('Greška pri učitavanju podataka', 'error')

@@ -20,6 +20,7 @@ import { ShiftSettingsModal } from './ShiftSettingsModal'
 import { ProfileModal } from '@/components/profile/ProfileModal'
 import { loadShiftSettings } from '@/lib/shiftSettings'
 import type { ShiftSettings } from '@/lib/shiftSettings'
+import { cacheSet, cacheGet } from '@/lib/localCache'
 
 export function WeekView() {
   const isOffline = useOffline()
@@ -40,20 +41,26 @@ export function WeekView() {
     setLoading(true)
     setError(false)
     setOfflineError(false)
+    const cacheKey = `week_${toISODateString(b.startDate)}`
     try {
       const res = await fetch(
         `/api/weeks/by-date?startDate=${toISODateString(b.startDate)}`
       )
       const json = await res.json()
       setWeekData(json.data)
+      cacheSet(cacheKey, json.data)
     } catch (err) {
       console.error('Greška pri učitavanju rasporeda:', err)
-      if (!navigator.onLine) {
+      const cached = cacheGet<WeekWithEntries | null>(cacheKey)
+      if (cached !== null) {
+        setWeekData(cached)
+      } else if (!navigator.onLine) {
         setOfflineError(true)
+        setWeekData(null)
       } else {
         setError(true)
+        setWeekData(null)
       }
-      setWeekData(null)
     } finally {
       setLoading(false)
     }
@@ -122,7 +129,7 @@ export function WeekView() {
             <Spinner size="lg" />
           </div>
         ) : offlineError ? (
-          <OfflinePlaceholder message="Raspored nije dostupan offline. Poseti ovu stranicu dok si online da bi se sačuvala u kešu." />
+          <OfflinePlaceholder message="Raspored nije dostupan bez interneta. Otvori ovu stranicu dok si na mreži." />
         ) : error ? (
           <ErrorCard
             message="Greška pri učitavanju rasporeda."

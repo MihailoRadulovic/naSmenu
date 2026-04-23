@@ -6,6 +6,7 @@ import type { EmployeeStats } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
 import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
+import { cacheSet, cacheGet } from '@/lib/localCache'
 import { EmployeeStatRow } from './EmployeeStatRow'
 
 interface CustomRangeViewProps {
@@ -36,10 +37,22 @@ export function CustomRangeView({ from, to, filteredEmployeeIds }: CustomRangeVi
         ? `&employeeIds=${Array.from(filteredEmployeeIds).join(',')}`
         : ''
 
+    const cacheKey = `stats_custom_${from}_${to}`
     fetch(`/api/stats/custom?from=${from}&to=${to}${empParam}`)
       .then((res) => res.json())
-      .then((json) => setData(json.data ?? []))
-      .catch(() => setError(!navigator.onLine ? 'offline' : 'Greška pri učitavanju statistika.'))
+      .then((json) => {
+        const d: EmployeeStats[] = json.data ?? []
+        setData(d)
+        cacheSet(cacheKey, d)
+      })
+      .catch(() => {
+        const cached = cacheGet<EmployeeStats[]>(cacheKey)
+        if (cached) {
+          setData(cached)
+        } else {
+          setError(!navigator.onLine ? 'offline' : 'Greška pri učitavanju statistika.')
+        }
+      })
       .finally(() => setLoading(false))
   }, [from, to, filteredEmployeeIds, isValidRange, retryCount])
 
@@ -74,7 +87,7 @@ export function CustomRangeView({ from, to, filteredEmployeeIds }: CustomRangeVi
 
   if (error) {
     return error === 'offline'
-      ? <OfflinePlaceholder message="Statistika nije dostupna offline." />
+      ? <OfflinePlaceholder message="Statistika nije dostupna bez interneta." />
       : <ErrorCard message={error} onRetry={() => setRetryCount((c) => c + 1)} />
   }
 

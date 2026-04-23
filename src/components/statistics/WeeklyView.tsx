@@ -7,6 +7,7 @@ import type { WeekStats } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
 import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
+import { cacheSet, cacheGet } from '@/lib/localCache'
 import { WeekAccordion } from './WeekAccordion'
 import { useFeatures } from '@/lib/features'
 
@@ -43,15 +44,23 @@ export function WeeklyView({ month, year, filteredEmployeeIds }: WeeklyViewProps
     setLoading(true)
     setError(null)
 
+    const cacheKey = `stats_weekly_${month}_${year}`
     fetch(`/api/stats/weekly?month=${month}&year=${year}`)
       .then((res) => res.json())
       .then((json) => {
         const weeks: WeekStats[] = json.data ?? []
         setData(weeks)
-        // Otvori prvu nedelju po defaultu
+        cacheSet(cacheKey, weeks)
         setOpenWeekIds(new Set())
       })
-      .catch(() => setError(!navigator.onLine ? 'offline' : 'Greška pri učitavanju sedmičnih statistika.'))
+      .catch(() => {
+        const cached = cacheGet<WeekStats[]>(cacheKey)
+        if (cached) {
+          setData(cached)
+        } else {
+          setError(!navigator.onLine ? 'offline' : 'Greška pri učitavanju sedmičnih statistika.')
+        }
+      })
       .finally(() => setLoading(false))
   }, [month, year, retryCount])
 
@@ -85,7 +94,7 @@ export function WeeklyView({ month, year, filteredEmployeeIds }: WeeklyViewProps
 
   if (error) {
     return error === 'offline'
-      ? <OfflinePlaceholder message="Statistika nije dostupna offline." />
+      ? <OfflinePlaceholder message="Statistika nije dostupna bez interneta." />
       : <ErrorCard message={error} onRetry={() => setRetryCount((c) => c + 1)} />
   }
 
