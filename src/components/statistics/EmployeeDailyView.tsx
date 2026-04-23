@@ -10,10 +10,6 @@ import { ErrorCard } from '@/components/ui/ErrorCard'
 import { cacheSet, cacheGet } from '@/lib/localCache'
 import { MonthYearPicker } from './MonthYearPicker'
 
-const MONTH_NAMES_SR = [
-  'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun',
-  'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar',
-]
 
 interface DayEntry {
   date: string

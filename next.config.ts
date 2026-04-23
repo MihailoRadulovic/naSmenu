@@ -5,6 +5,7 @@ const isDev = process.env.NODE_ENV === 'development'
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  turbopack: {},
   async headers() {
     return [
       {

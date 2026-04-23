@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Printer } from 'lucide-react'
-import type { WeekWithEntries } from '@/types'
-import type { WeekBounds } from '@/types'
+import type { WeekWithEntries, WeekBounds } from '@/types'
+import { DAY_NAMES_SHORT } from '@/types'
 import { formatDateShort } from '@/lib/dates'
 import { minutesToTime } from '@/lib/shiftHours'
 
@@ -13,7 +13,6 @@ interface Props {
   bounds: WeekBounds
 }
 
-const DAY_NAMES_SHORT = ['PON', 'UTO', 'SRE', 'ČET', 'PET', 'SUB', 'NED']
 
 function shiftCell(entries: WeekWithEntries['entries'], empId: number, day: number) {
   const shifts = entries.filter((e) => e.day === day && e.employeeId === empId)

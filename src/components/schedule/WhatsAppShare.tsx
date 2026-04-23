@@ -2,6 +2,7 @@
 
 import { Share2 } from 'lucide-react'
 import type { WeekWithEntries } from '@/types'
+import { DAY_NAMES_SHORT } from '@/types'
 import { formatDateShort, formatDate } from '@/lib/dates'
 import { minutesToTime } from '@/lib/shiftHours'
 
@@ -9,7 +10,6 @@ interface WhatsAppShareProps {
   weekData: WeekWithEntries
 }
 
-const DAY_SHORT = ['PON', 'UTO', 'SRE', 'ČET', 'PET', 'SUB', 'NED']
 
 const C = {
   bg:        '#0D0D0D',
@@ -152,7 +152,7 @@ async function generateImage(weekData: WeekWithEntries): Promise<Blob> {
     ctx.textAlign = 'center'
     ctx.fillStyle = C.white
     ctx.font = 'bold 14px system-ui, sans-serif'
-    ctx.fillText(DAY_SHORT[d], centerX, chY + COL_HDR_H / 2 - 3)
+    ctx.fillText(DAY_NAMES_SHORT[d], centerX, chY + COL_HDR_H / 2 - 3)
     ctx.fillStyle = C.muted
     ctx.font = '10px system-ui, sans-serif'
     ctx.fillText(formatDateShort(date), centerX, chY + COL_HDR_H / 2 + 13)

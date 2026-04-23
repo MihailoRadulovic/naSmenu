@@ -33,6 +33,11 @@ export const DAY_NAMES_SHORT = [
   'PON', 'UTO', 'SRE', 'ČET', 'PET', 'SUB', 'NED',
 ] as const
 
+export const MONTH_NAMES_SR = [
+  'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun',
+  'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar',
+] as const
+
 // Raspored tipovi
 export interface WeekWithEntries extends Week {
   entries: (ScheduleEntry & { employee: Employee })[]

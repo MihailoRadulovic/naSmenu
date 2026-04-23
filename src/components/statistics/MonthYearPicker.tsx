@@ -1,11 +1,7 @@
 'use client'
 
 import { ChevronDown } from 'lucide-react'
-
-const MONTH_NAMES_SR = [
-  'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun',
-  'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar',
-]
+import { MONTH_NAMES_SR } from '@/types'
 
 interface MonthYearPickerProps {
   month: number  // 1-12

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { BarChart3, Plus, ArrowUp } from 'lucide-react'
 import type { WeekStats } from '@/types'
+import { MONTH_NAMES_SR } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
 import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
@@ -11,10 +12,6 @@ import { cacheSet, cacheGet } from '@/lib/localCache'
 import { WeekAccordion } from './WeekAccordion'
 import { useFeatures } from '@/lib/features'
 
-const MONTH_NAMES_SR = [
-  'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun',
-  'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar',
-]
 
 interface WeeklyViewProps {
   month: number

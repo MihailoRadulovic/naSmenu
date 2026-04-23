@@ -9,6 +9,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
 import { ErrorCard } from '@/components/ui/ErrorCard'
 import { cacheSet, cacheGet } from '@/lib/localCache'
+import { MONTH_NAMES_SR } from '@/types'
 
 interface SalaryEntry {
   id: number
@@ -18,8 +19,6 @@ interface SalaryEntry {
   totalHours: number
   earned: number | null
 }
-
-const MONTH_NAMES = ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar']
 
 export default function SalaryPage() {
   const isOffline = useOffline()
@@ -97,7 +96,7 @@ export default function SalaryPage() {
           fetch('/api/salary', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ employeeId: Number(id), hourlyRate: rate }),
+            body: JSON.stringify({ employeeId: Number(id), hourlyRate: rate === '' ? null : parseFloat(rate) }),
           })
         )
       )
@@ -133,7 +132,7 @@ export default function SalaryPage() {
             onChange={e => setMonth(Number(e.target.value))}
             className="rounded-lg border border-border bg-bg-secondary px-2.5 py-1.5 text-sm text-text-primary cursor-pointer focus:outline-none focus:border-accent-green/50"
           >
-            {MONTH_NAMES.map((m, i) => (
+            {MONTH_NAMES_SR.map((m, i) => (
               <option key={i} value={i + 1}>{m}</option>
             ))}
           </select>
@@ -246,7 +245,7 @@ export default function SalaryPage() {
           {/* Monthly total */}
           <div className="flex items-center justify-between rounded-card border border-accent-green/20 bg-accent-green/8 px-5 py-4">
             <div className="text-sm text-text-secondary">
-              Ukupno za {MONTH_NAMES[month - 1]}
+              Ukupno za {MONTH_NAMES_SR[month - 1]}
             </div>
             <div className="text-xl font-bold tabular-nums text-accent-green">
               {totalEarned.toLocaleString('sr-RS')} RSD

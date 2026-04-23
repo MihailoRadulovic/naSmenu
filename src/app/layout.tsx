@@ -51,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="sr" className={`${plusJakartaSans.variable} ${outfit.variable}`}>
+    <html lang="sr" className={`${plusJakartaSans.variable} ${outfit.variable}`} suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192" />
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { BarChart3, Plus } from 'lucide-react'
 import type { EmployeeStats } from '@/types'
+import { MONTH_NAMES_SR } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
 import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
@@ -12,10 +13,6 @@ import { EmployeeStatRow } from './EmployeeStatRow'
 import { MonthlyHoursChart } from './MonthlyHoursChart'
 import { useFeatures } from '@/lib/features'
 
-const MONTH_NAMES_SR = [
-  'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun',
-  'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar',
-]
 
 type SortOrder = 'desc' | 'asc'
 
