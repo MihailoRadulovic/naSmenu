@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Calendar } from 'lucide-react'
 import { DAY_NAMES } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
+import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
+import { cacheSet, cacheGet } from '@/lib/localCache'
 import { MonthYearPicker } from './MonthYearPicker'
 
 const MONTH_NAMES_SR = [
@@ -115,15 +117,30 @@ export function EmployeeDailyView({ employeeId, initialMonth, initialYear }: Emp
   const [year, setYear] = useState(initialYear)
   const [data, setData] = useState<EmployeeData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [offlineError, setOfflineError] = useState(false)
   const [activeFilters, setActiveFilters] = useState<Set<FilterType>>(new Set())
 
   useEffect(() => {
     setLoading(true)
     setActiveFilters(new Set())
+    setOfflineError(false)
+    const cacheKey = `stats_employee_${employeeId}_${month}_${year}`
     fetch(`/api/stats/employee/${employeeId}?month=${month}&year=${year}`)
       .then((res) => res.json())
-      .then((json) => setData(json.data ?? null))
-      .catch(() => setData(null))
+      .then((json) => {
+        setData(json.data ?? null)
+        if (json.data) cacheSet(cacheKey, json.data)
+      })
+      .catch(() => {
+        const cached = cacheGet<EmployeeData>(cacheKey)
+        if (cached) {
+          setData(cached)
+        } else if (!navigator.onLine) {
+          setOfflineError(true)
+        } else {
+          setData(null)
+        }
+      })
       .finally(() => setLoading(false))
   }, [employeeId, month, year])
 
@@ -174,6 +191,8 @@ export function EmployeeDailyView({ employeeId, initialMonth, initialYear }: Emp
         <div className="flex items-center justify-center py-16">
           <Spinner size="lg" />
         </div>
+      ) : offlineError ? (
+        <OfflinePlaceholder message="Statistika zaposlenog nije dostupna bez interneta." />
       ) : !data ? (
         <div className="flex flex-col items-center justify-center gap-3 py-16 text-text-secondary">
           <Calendar size={48} className="text-text-muted" />

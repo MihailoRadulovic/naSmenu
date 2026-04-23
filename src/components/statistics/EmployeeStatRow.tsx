@@ -1,6 +1,10 @@
-import Link from 'next/link'
+'use client'
+
+import { useRouter } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
+import { useToast } from '@/contexts/ToastContext'
+import { useOffline } from '@/hooks/useOffline'
 import type { EmployeeStats } from '@/types'
 
 interface EmployeeStatRowProps {
@@ -32,15 +36,26 @@ function StatPill({
 }
 
 export function EmployeeStatRow({ stat, maxTotalHours, month, year }: EmployeeStatRowProps) {
+  const router = useRouter()
+  const { showToast } = useToast()
+  const isOffline = useOffline()
   const barWidth = maxTotalHours > 0 ? (stat.totalHours / maxTotalHours) * 100 : 0
   const href = month && year
     ? `/statistika/zaposleni/${stat.employee.id}?month=${month}&year=${year}`
     : `/statistika/zaposleni/${stat.employee.id}`
 
+  function handleClick() {
+    if (isOffline) {
+      showToast('Detalji zaposlenog nisu dostupni bez interneta', 'error')
+      return
+    }
+    router.push(href)
+  }
+
   return (
-    <Link
-      href={href}
-      className="flex flex-col gap-2 rounded-card border border-border bg-bg-secondary p-4 transition-all duration-200 hover:border-accent-green/40 hover:shadow-sm active:scale-[0.99]"
+    <button
+      onClick={handleClick}
+      className="flex w-full flex-col gap-2 rounded-card border border-border bg-bg-secondary p-4 text-left transition-all duration-200 hover:border-accent-green/40 hover:shadow-sm active:scale-[0.99]"
     >
       {/* Red 1: avatar + ime + strelica */}
       <div className="flex items-center gap-3">
@@ -99,6 +114,6 @@ export function EmployeeStatRow({ stat, maxTotalHours, month, year }: EmployeeSt
           style={{ width: `${barWidth}%` }}
         />
       </div>
-    </Link>
+    </button>
   )
 }
