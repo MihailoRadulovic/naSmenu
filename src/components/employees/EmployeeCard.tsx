@@ -11,9 +11,10 @@ interface EmployeeCardProps {
   onEdit: (employee: Employee) => void
   onToggleActive: (id: number) => void
   onDelete: (id: number) => void
+  disabled?: boolean
 }
 
-export function EmployeeCard({ employee, onEdit, onToggleActive, onDelete }: EmployeeCardProps) {
+export function EmployeeCard({ employee, onEdit, onToggleActive, onDelete, disabled }: EmployeeCardProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -43,9 +44,10 @@ export function EmployeeCard({ employee, onEdit, onToggleActive, onDelete }: Emp
 
       <div className="relative" ref={menuRef}>
         <button
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => !disabled && setMenuOpen(!menuOpen)}
+          disabled={disabled}
           aria-label="Više opcija"
-          className="rounded-full p-1.5 text-text-muted transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+          className="rounded-full p-1.5 text-text-muted transition-colors hover:bg-bg-tertiary hover:text-text-primary disabled:opacity-30 disabled:pointer-events-none"
         >
           <MoreVertical size={18} />
         </button>

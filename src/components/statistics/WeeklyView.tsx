@@ -6,6 +6,7 @@ import { BarChart3, Plus, ArrowUp } from 'lucide-react'
 import type { WeekStats } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
+import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
 import { WeekAccordion } from './WeekAccordion'
 import { useFeatures } from '@/lib/features'
 
@@ -50,7 +51,7 @@ export function WeeklyView({ month, year, filteredEmployeeIds }: WeeklyViewProps
         // Otvori prvu nedelju po defaultu
         setOpenWeekIds(new Set())
       })
-      .catch(() => setError('Greška pri učitavanju sedmičnih statistika.'))
+      .catch(() => setError(!navigator.onLine ? 'offline' : 'Greška pri učitavanju sedmičnih statistika.'))
       .finally(() => setLoading(false))
   }, [month, year, retryCount])
 
@@ -83,12 +84,9 @@ export function WeeklyView({ month, year, filteredEmployeeIds }: WeeklyViewProps
   }
 
   if (error) {
-    return (
-      <ErrorCard
-        message={error}
-        onRetry={() => setRetryCount((c) => c + 1)}
-      />
-    )
+    return error === 'offline'
+      ? <OfflinePlaceholder message="Statistika nije dostupna offline." />
+      : <ErrorCard message={error} onRetry={() => setRetryCount((c) => c + 1)} />
   }
 
   if (data.length === 0) {

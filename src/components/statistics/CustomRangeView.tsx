@@ -5,6 +5,7 @@ import { BarChart3 } from 'lucide-react'
 import type { EmployeeStats } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
+import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
 import { EmployeeStatRow } from './EmployeeStatRow'
 
 interface CustomRangeViewProps {
@@ -38,7 +39,7 @@ export function CustomRangeView({ from, to, filteredEmployeeIds }: CustomRangeVi
     fetch(`/api/stats/custom?from=${from}&to=${to}${empParam}`)
       .then((res) => res.json())
       .then((json) => setData(json.data ?? []))
-      .catch(() => setError('Greška pri učitavanju statistika.'))
+      .catch(() => setError(!navigator.onLine ? 'offline' : 'Greška pri učitavanju statistika.'))
       .finally(() => setLoading(false))
   }, [from, to, filteredEmployeeIds, isValidRange, retryCount])
 
@@ -72,12 +73,9 @@ export function CustomRangeView({ from, to, filteredEmployeeIds }: CustomRangeVi
   }
 
   if (error) {
-    return (
-      <ErrorCard
-        message={error}
-        onRetry={() => setRetryCount((c) => c + 1)}
-      />
-    )
+    return error === 'offline'
+      ? <OfflinePlaceholder message="Statistika nije dostupna offline." />
+      : <ErrorCard message={error} onRetry={() => setRetryCount((c) => c + 1)} />
   }
 
   if (filteredData.length === 0) {

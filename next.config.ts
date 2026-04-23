@@ -40,6 +40,9 @@ export default withPWA({
   aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
   disable: process.env.NODE_ENV === 'development',
+  fallbacks: {
+    document: '/offline',
+  },
   workboxOptions: {
     disableDevLogs: true,
     runtimeCaching: [
@@ -48,7 +51,8 @@ export default withPWA({
         handler: 'NetworkFirst',
         options: {
           cacheName: 'api-cache',
-          expiration: { maxEntries: 50, maxAgeSeconds: 3600 },
+          networkTimeoutSeconds: 5,
+          expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 7 },
         },
       },
     ],

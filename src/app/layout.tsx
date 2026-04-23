@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { plusJakartaSans, outfit } from '@/lib/fonts'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { UpdatePrompt } from '@/components/UpdatePrompt'
+import { OfflineBanner } from '@/components/OfflineBanner'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { NextAuthProvider } from '@/components/providers/NextAuthProvider'
@@ -70,6 +71,7 @@ export default function RootLayout({
               <div className="app-container">
                 <main id="main-content" className="px-4 pt-4 schedule-grid">{children}</main>
               </div>
+              <OfflineBanner />
               <BottomNav />
               <UpdatePrompt />
             </ThemeProvider>

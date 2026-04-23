@@ -6,6 +6,7 @@ import { BarChart3, Plus } from 'lucide-react'
 import type { EmployeeStats } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
+import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
 import { EmployeeStatRow } from './EmployeeStatRow'
 import { MonthlyHoursChart } from './MonthlyHoursChart'
 import { useFeatures } from '@/lib/features'
@@ -38,7 +39,7 @@ export function MonthlyView({ month, year, filteredEmployeeIds }: MonthlyViewPro
     fetch(`/api/stats/monthly?month=${month}&year=${year}`)
       .then((res) => res.json())
       .then((json) => setData(json.data ?? []))
-      .catch(() => setError('Greška pri učitavanju mesečnih statistika.'))
+      .catch(() => setError(!navigator.onLine ? 'offline' : 'Greška pri učitavanju mesečnih statistika.'))
       .finally(() => setLoading(false))
   }, [month, year, retryCount])
 
@@ -73,12 +74,9 @@ export function MonthlyView({ month, year, filteredEmployeeIds }: MonthlyViewPro
   }
 
   if (error) {
-    return (
-      <ErrorCard
-        message={error}
-        onRetry={() => setRetryCount((c) => c + 1)}
-      />
-    )
+    return error === 'offline'
+      ? <OfflinePlaceholder message="Statistika nije dostupna offline." />
+      : <ErrorCard message={error} onRetry={() => setRetryCount((c) => c + 1)} />
   }
 
   if (data.length === 0) {

@@ -8,13 +8,17 @@ import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { useToast } from '@/contexts/ToastContext'
 import { Spinner } from '@/components/ui/Spinner'
+import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
+import { useOffline } from '@/hooks/useOffline'
 import { EmployeeCard } from './EmployeeCard'
 import { EmployeeModal } from './EmployeeModal'
 
 export function EmployeeList() {
+  const isOffline = useOffline()
   const { showToast } = useToast()
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(true)
+  const [offlineError, setOfflineError] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
@@ -26,6 +30,7 @@ export function EmployeeList() {
       setEmployees(json.data)
     } catch (err) {
       console.error('Greška pri učitavanju zaposlenih:', err)
+      if (!navigator.onLine) setOfflineError(true)
     } finally {
       setLoading(false)
     }
@@ -91,13 +96,15 @@ export function EmployeeList() {
     <div>
       <PageHeader
         title="Zaposleni"
-        action={{ label: '+ Dodaj', onClick: handleAddNew }}
+        action={isOffline ? undefined : { label: '+ Dodaj', onClick: handleAddNew }}
       />
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Spinner size="lg" />
         </div>
+      ) : offlineError ? (
+        <OfflinePlaceholder message="Lista zaposlenih nije dostupna offline." />
       ) : employees.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 py-20 text-text-secondary">
           <Users size={48} className="text-text-muted" />
@@ -116,6 +123,7 @@ export function EmployeeList() {
               onEdit={handleEdit}
               onToggleActive={handleToggleActive}
               onDelete={handleDelete}
+              disabled={isOffline}
             />
           ))}
         </div>

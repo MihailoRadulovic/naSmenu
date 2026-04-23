@@ -10,6 +10,8 @@ import { getCurrentWeekBounds, addWeeks, toISODateString, getWeekBounds } from '
 import { ThemeToggleButton } from '@/components/layout/ThemeToggleButton'
 import { Spinner } from '@/components/ui/Spinner'
 import { ErrorCard } from '@/components/ui/ErrorCard'
+import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
+import { useOffline } from '@/hooks/useOffline'
 import { WeekPicker } from './WeekPicker'
 import { DayCard } from './DayCard'
 import { WhatsAppShare } from './WhatsAppShare'
@@ -20,6 +22,7 @@ import { loadShiftSettings } from '@/lib/shiftSettings'
 import type { ShiftSettings } from '@/lib/shiftSettings'
 
 export function WeekView() {
+  const isOffline = useOffline()
   const searchParams = useSearchParams()
   const [bounds, setBounds] = useState<WeekBounds>(() => {
     const startDate = searchParams.get('startDate')
@@ -28,6 +31,7 @@ export function WeekView() {
   const [weekData, setWeekData] = useState<WeekWithEntries | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [offlineError, setOfflineError] = useState(false)
   const [shiftSettings, setShiftSettings] = useState<ShiftSettings>(loadShiftSettings)
   const [showSettings, setShowSettings] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
@@ -35,6 +39,7 @@ export function WeekView() {
   const fetchWeek = useCallback(async (b: WeekBounds) => {
     setLoading(true)
     setError(false)
+    setOfflineError(false)
     try {
       const res = await fetch(
         `/api/weeks/by-date?startDate=${toISODateString(b.startDate)}`
@@ -43,7 +48,11 @@ export function WeekView() {
       setWeekData(json.data)
     } catch (err) {
       console.error('Greška pri učitavanju rasporeda:', err)
-      setError(true)
+      if (!navigator.onLine) {
+        setOfflineError(true)
+      } else {
+        setError(true)
+      }
       setWeekData(null)
     } finally {
       setLoading(false)
@@ -112,6 +121,8 @@ export function WeekView() {
           <div className="flex items-center justify-center py-20">
             <Spinner size="lg" />
           </div>
+        ) : offlineError ? (
+          <OfflinePlaceholder message="Raspored nije dostupan offline. Poseti ovu stranicu dok si online da bi se sačuvala u kešu." />
         ) : error ? (
           <ErrorCard
             message="Greška pri učitavanju rasporeda."
@@ -120,13 +131,17 @@ export function WeekView() {
         ) : weekData === null ? (
           <div className="flex flex-col items-center justify-center gap-4 rounded-card border border-dashed border-border py-16 text-center">
             <p className="text-text-secondary">Raspored za ovu nedelju nije kreiran.</p>
-            <Link
-              href={`/novi?startDate=${toISODateString(bounds.startDate)}`}
-              className="inline-flex items-center gap-2 rounded-pill bg-accent-green px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-green-dark active:scale-[0.97]"
-            >
-              <Plus size={16} />
-              Kreiraj raspored
-            </Link>
+            {isOffline ? (
+              <p className="text-xs text-text-muted">Kreiranje nije dostupno offline.</p>
+            ) : (
+              <Link
+                href={`/novi?startDate=${toISODateString(bounds.startDate)}`}
+                className="inline-flex items-center gap-2 rounded-pill bg-accent-green px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-green-dark active:scale-[0.97]"
+              >
+                <Plus size={16} />
+                Kreiraj raspored
+              </Link>
+            )}
           </div>
         ) : (
           <>

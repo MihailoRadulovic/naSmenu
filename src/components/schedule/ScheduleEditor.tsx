@@ -15,6 +15,8 @@ import {
   getWeekBounds,
 } from '@/lib/dates'
 import { Spinner } from '@/components/ui/Spinner'
+import { OfflinePlaceholder } from '@/components/ui/OfflinePlaceholder'
+import { useOffline } from '@/hooks/useOffline'
 import { ThemeToggleButton } from '@/components/layout/ThemeToggleButton'
 import { useToast } from '@/contexts/ToastContext'
 import { WeekPicker } from './WeekPicker'
@@ -46,6 +48,7 @@ function getShiftTypes(schedule: WeekSchedule, day: number, empId: number): Shif
 }
 
 export function ScheduleEditor() {
+  const isOffline = useOffline()
   const features = useFeatures()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -66,6 +69,7 @@ export function ScheduleEditor() {
   )
   const [saving, setSaving] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
+  const [offlineError, setOfflineError] = useState(false)
   const [copyingWeek, setCopyingWeek] = useState(false)
   // key = `${day}-${employeeId}`, value = { start: "HH:MM", end: "HH:MM" }
   const [middleTimes, setMiddleTimes] = useState<Record<string, { start: string; end: string }>>({})
@@ -113,7 +117,11 @@ export function ScheduleEditor() {
       }
     } catch (err) {
       console.error('Greška pri učitavanju podataka:', err)
-      showToast('Greška pri učitavanju podataka', 'error')
+      if (!navigator.onLine) {
+        setOfflineError(true)
+      } else {
+        showToast('Greška pri učitavanju podataka', 'error')
+      }
     } finally {
       setLoadingData(false)
     }
@@ -347,7 +355,7 @@ export function ScheduleEditor() {
       {features.copyWeek && (
         <button
           onClick={handleCopyPreviousWeek}
-          disabled={copyingWeek || loadingData}
+          disabled={copyingWeek || loadingData || isOffline}
           className="no-print flex items-center justify-center gap-2 rounded-card border border-border bg-bg-secondary px-4 py-2.5 text-sm text-text-secondary transition-colors hover:border-accent-green/40 hover:text-accent-green disabled:opacity-50 disabled:pointer-events-none"
         >
           {copyingWeek ? <Spinner size="sm" /> : <Copy size={15} />}
@@ -380,6 +388,8 @@ export function ScheduleEditor() {
         <div className="flex items-center justify-center py-16">
           <Spinner size="lg" />
         </div>
+      ) : offlineError ? (
+        <OfflinePlaceholder message="Editor rasporeda nije dostupan offline." />
       ) : (
         <div className="flex flex-col gap-3">
           {[...BASE_SHIFT_SECTIONS, ...(features.absenceTypes ? ABSENCE_SHIFT_SECTIONS : [])].map(({ shiftType, emoji, label }) => {
@@ -493,11 +503,11 @@ export function ScheduleEditor() {
       <div className="pb-4">
         <button
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || isOffline}
           className="flex w-full items-center justify-center gap-2 rounded-pill bg-accent-green px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-accent-green-dark active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none shadow-sm"
         >
           <Save size={18} />
-          {saving ? 'Čuvanje...' : 'Sačuvaj raspored'}
+          {saving ? 'Čuvanje...' : isOffline ? 'Nije dostupno offline' : 'Sačuvaj raspored'}
         </button>
       </div>
     </div>

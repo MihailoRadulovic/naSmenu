@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { ArrowDownUp, ArrowDown, ArrowUp } from 'lucide-react'
 import { useFeatures } from '@/lib/features'
 import { ThemeToggleButton } from '@/components/layout/ThemeToggleButton'
+import { useOffline } from '@/hooks/useOffline'
 
 interface SalaryEntry {
   id: number
@@ -17,6 +18,7 @@ interface SalaryEntry {
 const MONTH_NAMES = ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar']
 
 export default function SalaryPage() {
+  const isOffline = useOffline()
   const features = useFeatures()
   const now = new Date()
   const [month, setMonth] = useState(now.getMonth() + 1)
@@ -228,10 +230,10 @@ export default function SalaryPage() {
           {dirty && (
             <button
               onClick={handleSaveAll}
-              disabled={saving}
+              disabled={saving || isOffline}
               className="mt-3 w-full rounded-card bg-accent-green py-3 text-sm font-semibold text-bg-primary transition-opacity disabled:opacity-60"
             >
-              {saving ? 'Čuvanje...' : 'Sačuvaj cene'}
+              {saving ? 'Čuvanje...' : isOffline ? 'Nije dostupno offline' : 'Sačuvaj cene'}
             </button>
           )}
         </>
